@@ -127,7 +127,7 @@ body {
 @keyframes blink { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { #camfx .rec { animation: none; } }
 #offline { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; background: rgba(40, 10, 10, 0.55); }
-#offline b { font: 700 clamp(28px, 8vw, 52px) var(--f-display); color: var(--danger); letter-spacing: 0.08em; text-shadow: 0 2px 10px #000; }
+#offline b { font: 700 clamp(20px, 5.5vw, 44px) var(--f-display); text-align: center; padding: 0 16px; color: var(--danger); letter-spacing: 0.08em; text-shadow: 0 2px 10px #000; }
 #hitflash { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 6px rgba(255,107,107,0.8); opacity: 0; transition: opacity 0.15s; }
 
 #joy { position: fixed; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; border: 2px solid rgba(238,241,238,0.35); background: rgba(17,20,22,0.3); pointer-events: none; }
@@ -266,7 +266,7 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
           <li>Omgångar på 60 s. Först till målpoäng vinner.</li>
           <li>Vid noll får varje hund 1 eller 2 poäng om den står i zonerna på sidan laget anfaller.</li>
           <li>Nästa omgång vänder: lagen kör tillbaka från där de står.</li>
-          <li>28 träffar slår ut en hund i 4 s. Vådaskott räknas.</li>
+          <li>28 träffar slår ut en hund i 4 s. Varje hund har <b>en reboot per omgång</b>: slås den ut igen är den ute resten av omgången och ger 0 poäng. Vådaskott räknas.</li>
           <li>Magasinet rymmer 60 skott. Tomt magasin betyder omladdning, 2,5 s.</li>
           <li>Skjut ner lagets måltavla först och välj <b>Fart</b> (100&nbsp;% i 5&nbsp;s) eller <b>Sköld</b> (12 extra träffar).</li>
         </ul>
@@ -332,6 +332,7 @@ if (!window.THREE) { $('err').hidden = false; $('menu').hidden = true; return; }
 const HX = 21, HZ = 7;                         // course half-length / half-width
 const ZB = { z2: 13.5, z1: 8 };                // zone boundaries from the centre
 const ROUND_TIME = 60, HIT_LIMIT = 28, OFFLINE_T = 4, SHIELD_HITS = 12, BOOST_T = 5;
+const REBOOTS = 1; // per dog and round; the next knockout puts the dog out until the round ends
 const MAG = 60, RELOAD_T = 2.5;
 const FULL = 1.4, NORMAL = FULL * 0.75;
 const DOG_R = 0.55;
@@ -409,14 +410,15 @@ for (let j = 0; j < GR; j++) for (let i = 0; i < GC; i++) {
   for (const s of OBST) if (contains(s, x, z, DOG_R + 0.12)) { b = true; break; }
   blocked[j * GC + i] = b ? 1 : 0;
 }
-function buildFlow(att) {
+function buildFlow(att, seedFn) {
   const dist = new Float64Array(GC * GR).fill(Infinity), heap = [];
   const push = (d, i) => { heap.push([d, i]); let k = heap.length - 1; while (k > 0) { const p = (k - 1) >> 1; if (heap[p][0] <= heap[k][0]) break; [heap[p], heap[k]] = [heap[k], heap[p]]; k = p; } };
   const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let k = 0; for (;;) { const l = 2 * k + 1, r = l + 1; let m = k; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === k) break; [heap[m], heap[k]] = [heap[k], heap[m]]; k = m; } } return top; };
   for (let j = 0; j < GR; j++) for (let i = 0; i < GC; i++) {
     const idx = j * GC + i; if (blocked[idx]) continue;
     const x = -HX + (i + 0.5) * CELL;
-    if (att > 0 ? x > ZB.z2 + 0.6 : x < -ZB.z2 - 0.6) { dist[idx] = 0; push(0, idx); }
+    const z = -HZ + (j + 0.5) * CELL;
+    if (seedFn ? seedFn(x, z) : (att > 0 ? x > ZB.z2 + 0.6 : x < -ZB.z2 - 0.6)) { dist[idx] = 0; push(0, idx); }
   }
   while (heap.length) {
     const [d, idx] = pop(); if (d > dist[idx]) continue;
@@ -433,8 +435,27 @@ function buildFlow(att) {
   return dist;
 }
 const FLOW = { '1': buildFlow(1), '-1': buildFlow(-1) };
-function flowDir(x, z, att) {
-  const f = FLOW[att];
+function flowDist(x, z, f) {
+  const i = clamp(Math.floor((x + HX) / CELL), 0, GC - 1), j = clamp(Math.floor((z + HZ) / CELL), 0, GR - 1);
+  let best = f[j * GC + i];
+  if (best === Infinity) for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const ni = i + dx, nj = j + dy; if (ni >= 0 && nj >= 0 && ni < GC && nj < GR) best = Math.min(best, f[nj * GC + ni] + Math.hypot(dx, dy)); }
+  return best * CELL;
+}
+// Cover spots: the lee side of each block, facing your own platform, per attack direction.
+const SPOTS = { '1': [], '-1': [] };
+for (const a of [1, -1]) for (const s of OBST) {
+  if (s.t !== 'box') continue;
+  const n = s.hz > 0.9 ? [-0.55, 0.55] : [0];
+  for (const off of n) {
+    const x = s.x - a * (s.hx + DOG_R + 0.25), z = s.z + off * s.hz;
+    const i = Math.floor((x + HX) / CELL), j = Math.floor((z + HZ) / CELL);
+    if (blocked[j * GC + i]) continue;
+    SPOTS[a].push({ x, z, flow: null });
+  }
+}
+function spotFlow(sp) { return sp.flow || (sp.flow = buildFlow(0, (x, z) => Math.hypot(x - sp.x, z - sp.z) < 0.3)); }
+function flowDir(x, z, att, field) {
+  const f = field || FLOW[att];
   const i = clamp(Math.floor((x + HX) / CELL), 0, GC - 1), j = clamp(Math.floor((z + HZ) / CELL), 0, GR - 1);
   let best = f[j * GC + i], bi = 0, bj = 0;
   if (best === Infinity) {
@@ -497,8 +518,8 @@ function newGame() {
       shooters: [makeShooter(team, m * 15, -9, 0), makeShooter(team, m * 23.5, 0, 1), makeShooter(team, m * 15, 9, 2)],
       dogs: [-4, 0, 4].map((z, idx) => ({
         team, idx, x: m * 19.5, z, vx: 0, vz: 0, angle: m > 0 ? Math.PI : 0,
-        hits: 0, shield: 0, offline: 0, phase: Math.random() * 6, holdZ: [-4.5, 0, 4.5][idx] + rnd(-0.4, 0.4),
-        stuck: 0, side: 0, sideT: 0, flash: 0,
+        hits: 0, shield: 0, offline: 0, reboots: REBOOTS, dead: false, phase: Math.random() * 6, holdZ: [-4.5, 0, 4.5][idx] + rnd(-0.4, 0.4),
+        stuck: 0, side: 0, sideT: 0, flash: 0, planT: 0, spot: null, aggr: Math.random(),
       })),
     };
   }
@@ -565,7 +586,7 @@ function pickTarget(team, sh, cfg) {
   let best = null, bs = -1e9;
   for (const d of G.teams[opp].dogs) {
     if (d.offline > 0) continue;
-    let s = prog(d.x, att(d.team)) * 3 + d.hits / HIT_LIMIT * 1.2 - (d.shield > 0 ? 1.2 : 0) + Math.random() * 0.8;
+    let s = prog(d.x, att(d.team)) * 3 + d.hits / HIT_LIMIT * (d.reboots > 0 ? 1.2 : 2.4) - (d.shield > 0 ? 1.2 : 0) + Math.random() * 0.8;
     const p0 = muzzle(sh), sol = solveLaunch(p0, d.x, 0.55, d.z, SHOT_V), tr = trace(p0, sol.yaw, sol.pitch, team);
     if (tr.what === 'cover') s -= 10;
     else if (tr.what === 'dog' && tr.dog.team === team && cfg.ff) s -= 10;
@@ -609,8 +630,9 @@ function hitDog(d) {
   if (d.shield > 0) { d.shield--; if (d.shield === 0) beep(300, 0.18, 'sawtooth', 0.03, -180); return; }
   d.hits++;
   if (d.hits >= HIT_LIMIT) {
-    d.offline = OFFLINE_T; d.hits = 0; d.vx = d.vz = 0;
-    popup(d.x, 1.8, d.z, 'OFFLINE', '#ff6b6b', 1.2);
+    d.hits = 0; d.vx = d.vz = 0;
+    if (d.reboots > 0) { d.reboots--; d.offline = OFFLINE_T; popup(d.x, 1.8, d.z, 'OFFLINE', '#ff6b6b', 1.2); }
+    else { d.dead = true; d.offline = Infinity; popup(d.x, 1.8, d.z, 'UTE', '#ff6b6b', 2); }
     beep(160, 0.35, 'sawtooth', 0.05, -100);
     if (d.team === 'blue') buzz(120);
   }
@@ -673,7 +695,28 @@ function aiDog(d, dt) {
     want = l < 0.25 ? { x: 0, z: 0 } : { x: dx / l, z: dz / l };
     if (l < 1.5) want = { x: want.x * l / 1.5, z: want.z * l / 1.5 };
   } else {
-    want = flowDir(d.x, d.z, a);
+    // Pace the run: wait behind cover until there is just enough time left to reach the 2-zone.
+    const speed = NORMAL * cfg.dogSpeed;
+    d.planT -= dt;
+    if (d.planT <= 0) {
+      d.planT = 0.8;
+      const eta = flowDist(d.x, d.z, FLOW[a]) / speed * 1.3 + 2;
+      const slack = G.timeLeft - eta - (4 + d.aggr * 6);
+      d.spot = null;
+      if (slack > 0) {
+        let best = null, bp = -1;
+        for (const sp of SPOTS[a]) {
+          if (G.teams[d.team].dogs.some(o => o !== d && o.spot === sp)) continue;
+          const p = prog(sp.x, a); if (p < prog(d.x, a) - 0.03) continue;
+          const etaSp = flowDist(sp.x, sp.z, FLOW[a]) / speed * 1.3 + 2 + flowDist(d.x, d.z, spotFlow(sp)) / speed * 1.2;
+          if (etaSp > G.timeLeft - (3 + d.aggr * 4)) continue;
+          if (p > bp) { bp = p; best = sp; }
+        }
+        d.spot = best;
+      }
+    }
+    if (d.spot && Math.hypot(d.spot.x - d.x, d.spot.z - d.z) < 0.5) { steer(d, 0, 0, dt); d.stuck = 0; return; }
+    want = d.spot ? flowDir(d.x, d.z, a, spotFlow(d.spot)) : flowDir(d.x, d.z, a);
     // keep right when meeting another dog head-on so lanes don't deadlock
     for (const o of G.dogs) {
       if (o === d) continue;
@@ -747,7 +790,7 @@ function drivePlayerShooter(dt) {
 // ---------- round flow ----------
 function endRound() {
   const gain = { blue: 0, red: 0 };
-  for (const d of G.dogs) { const v = zoneVal(d.x, att(d.team)); gain[d.team] += v; popup(d.x, 2.0, d.z, `+${v}`, TEAM[d.team].light, 2.8); }
+  for (const d of G.dogs) { const v = d.dead ? 0 : zoneVal(d.x, att(d.team)); gain[d.team] += v; popup(d.x, 2.0, d.z, d.dead ? 'UTE +0' : `+${v}`, TEAM[d.team].light, 2.8); }
   G.score.blue += gain.blue; G.score.red += gain.red;
   G.lastGain = gain; G.phase = 'score'; G.freeze = 3;
   G.shots = []; G.pus = []; G.choice = null;
@@ -761,6 +804,7 @@ function afterScore() {
   G.dir *= -1; G.round++; G.timeLeft = ROUND_TIME; G.phase = 'play'; G.attackDirty = true;
   G.puQueue = [...PU_SPAWNS];
   for (const t of Object.values(G.teams)) t.boostUntil = -1;
+  for (const d of G.dogs) { d.planT = 0; d.spot = null; d.reboots = REBOOTS; if (d.dead) { d.dead = false; d.offline = 0; d.hits = 0; } }
   showBanner(G.overtime ? `OMGÅNG ${G.round} · FÖRLÄNGNING` : `OMGÅNG ${G.round} · VÄND`, `Blå anfaller ${G.dir > 0 ? 'höger' : 'vänster'} sida`, 2.6);
 }
 function gameOver(winner) {
@@ -961,13 +1005,14 @@ function makeDogView(d) {
 }
 function drawLabel(v) {
   const d = v.d, off = d.offline > 0;
-  const key = `${d.hits}|${off ? Math.ceil(d.offline * 4) : -1}|${d.shield}`;
+  const key = `${d.hits}|${d.dead ? 'x' : off ? Math.ceil(d.offline * 4) : -1}|${d.shield}|${d.reboots}`;
   if (key === v.key) return; v.key = key;
   const c = v.lc.getContext('2d'); c.clearRect(0, 0, 128, 48);
   if (d.team === 'blue') { c.font = '700 20px "JetBrains Mono", monospace'; c.textAlign = 'center'; c.strokeStyle = 'rgba(0,0,0,0.8)'; c.lineWidth = 4; c.fillStyle = '#fff'; c.strokeText(String(d.idx + 1), 64, 20); c.fillText(String(d.idx + 1), 64, 20); }
   c.fillStyle = 'rgba(0,0,0,0.6)'; c.fillRect(24, 30, 80, 10);
-  if (off) { c.fillStyle = '#ff6b6b'; c.fillRect(24, 30, 80 * d.offline / OFFLINE_T, 10); }
-  else { const f = d.hits / HIT_LIMIT; c.fillStyle = f > 0.75 ? '#ff6b6b' : f > 0.45 ? '#f2c230' : '#e9ece9'; c.fillRect(24, 30, 80 * f, 10); if (d.shield > 0) { c.fillStyle = '#5fe0e6'; c.fillRect(24, 42, 80 * d.shield / SHIELD_HITS, 4); } }
+  if (d.dead) { c.font = '700 14px "JetBrains Mono", monospace'; c.textAlign = 'center'; c.fillStyle = '#ff6b6b'; c.fillText('UTE', 64, 40); }
+  else if (off) { c.fillStyle = '#ff6b6b'; c.fillRect(24, 30, 80 * d.offline / OFFLINE_T, 10); }
+  else { if (d.reboots === 0) { c.fillStyle = '#ff6b6b'; c.fillRect(18, 30, 4, 10); } const f = d.hits / HIT_LIMIT; c.fillStyle = f > 0.75 ? '#ff6b6b' : f > 0.45 ? '#f2c230' : '#e9ece9'; c.fillRect(24, 30, 80 * f, 10); if (d.shield > 0) { c.fillStyle = '#5fe0e6'; c.fillRect(24, 42, 80 * d.shield / SHIELD_HITS, 4); } }
   v.lt.needsUpdate = true;
 }
 
@@ -1073,7 +1118,7 @@ function drawMini() {
   }
   for (const p of G.pus) { mctx.fillStyle = TEAM[p.team].css; mctx.beginPath(); mctx.arc(X(p.x), Z(p.z), 4, 0, Math.PI * 2); mctx.fill(); mctx.strokeStyle = '#f2c230'; mctx.stroke(); }
   for (const d of G.dogs) {
-    mctx.fillStyle = d.offline > 0 ? '#777' : TEAM[d.team].css;
+    mctx.fillStyle = d.dead ? '#3a3a3a' : d.offline > 0 ? '#777' : TEAM[d.team].css;
     mctx.beginPath(); mctx.arc(X(d.x), Z(d.z), 4.5, 0, Math.PI * 2); mctx.fill();
     if (d === playerDog()) { mctx.strokeStyle = '#fff'; mctx.lineWidth = 2; mctx.stroke(); }
   }
@@ -1102,7 +1147,7 @@ function render(dt, time) {
     v.tilt.position.y = off ? -0.3 : Math.abs(Math.sin(d.phase * 2)) * 0.02;
     v.darkMat.color.setHex(off ? 0x4a4f52 : d.flash > 0 ? 0xffffff : TEAM[d.team].dark);
     v.bodyMat.color.setHex(off ? 0x5d6366 : TEAM[d.team].body);
-    let led = 0x57e389; if (off) led = Math.sin(time * 18) > 0 ? 0xff4d4d : 0x4a1515; else if (d.shield > 0) led = 0x5fe0e6; else if (boosted) led = 0xf2c230;
+    let led = 0x57e389; if (d.dead) led = 0x2a0a0a; else if (off) led = Math.sin(time * 18) > 0 ? 0xff4d4d : 0x4a1515; else if (d.shield > 0) led = 0x5fe0e6; else if (boosted) led = 0xf2c230;
     v.ledMat.color.setHex(led);
     v.shield.visible = d.shield > 0; v.shield.material.opacity = 0.08 + 0.18 * d.shield / SHIELD_HITS;
     drawLabel(v);
@@ -1179,10 +1224,11 @@ function updateHUD(time, dt) {
   const isDog = G.role === 'dog';
   G.teams.blue.dogs.forEach((d, i) => {
     const c = cards[i]; c.b.setAttribute('aria-pressed', String(isDog && i === G.sel));
-    let st = `${d.hits}/${HIT_LIMIT}`, cls = 'st';
-    if (d.offline > 0) { st = `OFF ${d.offline.toFixed(1)}`; cls = 'st off'; } else if (d.shield > 0) { st = `SKÖLD ${d.shield}`; cls = 'st sh'; }
+    let st = `${d.hits}/${HIT_LIMIT} ↻${d.reboots}`, cls = d.reboots === 0 ? 'st off' : 'st';
+    if (d.dead) { st = 'UTE'; cls = 'st off'; }
+    else if (d.offline > 0) { st = `OFF ${d.offline.toFixed(1)}`; cls = 'st off'; } else if (d.shield > 0) { st = `SKÖLD ${d.shield}`; cls = 'st sh'; }
     if (c.st.textContent !== st) c.st.textContent = st; c.st.className = cls;
-    c.m.className = d.offline > 0 ? 'off' : ''; c.m.style.width = (d.offline > 0 ? d.offline / OFFLINE_T : d.hits / HIT_LIMIT) * 100 + '%';
+    c.m.className = d.offline > 0 ? 'off' : ''; c.m.style.width = (d.dead ? 1 : d.offline > 0 ? d.offline / OFFLINE_T : d.hits / HIT_LIMIT) * 100 + '%';
   });
   // role-specific
   $('gun').hidden = isDog; $('cross').hidden = isDog; $('b-cam').hidden = !isDog; $('cards').classList.toggle('side', !isDog);
@@ -1191,7 +1237,8 @@ function updateHUD(time, dt) {
     const d = playerDog();
     setText('camlbl', `CAM · HUND ${G.sel + 1}${G.teams.blue.boostUntil > G.t ? ' · BOOST' : ''}`);
     $('offline').hidden = !(d.offline > 0 && G.phase === 'play');
-    if (d.offline > 0) setText('offline-t', `OFFLINE ${d.offline.toFixed(1)}`);
+    if (d.dead) setText('offline-t', 'UTE RESTEN AV OMGÅNGEN · BYT HUND');
+    else if (d.offline > 0) setText('offline-t', `OFFLINE ${d.offline.toFixed(1)} · SISTA REBOOT`);
     $('b-cam').textContent = dogCam === 'fpv' ? 'Vy: kamera' : 'Vy: bakom';
   } else {
     $('offline').hidden = true;

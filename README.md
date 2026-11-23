@@ -41,13 +41,14 @@ Varje skytt, även datorns, har **60 skott per magasin** och laddar om på 2,5 s
 ## Övriga regler
 
 - Omgångar på 60 s. Man spelar till 21 eller 11 poäng.
-- 28 träffar slår ut en hund i 4 s. Vådaskott räknas.
+- 28 träffar slår ut en hund i 4 s. Varje hund har **en reboot per omgång**: slås den ut en andra gång är den ute resten av omgången, står kvar som hinder och ger 0 poäng. Alla hundar startar om inför nästa omgång. Vådaskott räknas.
+- Datorns hundar väntar bakom skydd och springer mot 2-zonen när det är lagom mycket tid kvar.
 - Hundarna går i 75 % fart. Fartboost ger 100 % i 5 s.
 
 ## Husregler för de öppna frågorna
 
 1. **Zoner:** 2 · 1 · mitten · 1 · 2, enligt skissen. Laget får poäng på den sida det anfaller.
-2. **Offline:** 4 s. Hit-räknaren nollställs efter offline.
+2. **Offline:** 4 s. Hit-räknaren nollställs efter offline. Bara en reboot per hund och omgång.
 3. **Sköld:** 12 extra träffar per hund. Skölden gäller tills den går sönder.
 4. **Kontakt:** Knuffar och blockeringar är tillåtna. Det går inte att välta en hund.
 5. **Power-ups:** två per omgång, när det är 45 s och 22 s kvar. Varje lag får en egen måltavla på sidan av banan med 10 träffpoäng. Laget som skjuter ner sin först väljer power-up.
