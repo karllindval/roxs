@@ -12,7 +12,7 @@ En spelbar webbprototyp av regelutkastet *ROBOT RUSH v0.1*, med banan från whit
 - Lagen startar längst bak på var sin kortsida och kör mot motståndarens sida.
 - Zonerna är speglade: **3 · 2 · 1 · mitten · 1 · 2 · 3**. Ett lag får poäng i zonerna på den sida det anfaller.
 - Omgången blåses av när den första hunden når 3-zonen, när alla hundar är utslagna eller står i 3-zonen, eller efter 60 s. Då får varje hund poängen för zonen den står i.
-- Varje omgång startar om från början: hundarna ställs längst bak, på motsatt sida mot förra omgången. Träffar, reboots och sköldar nollställs.
+- Varje omgång startar om från början: hundarna ställs längst bak, på motsatt sida mot förra omgången. Träffar, reboots och sköldar nollställs, och skyttarna flyttar till U:et på lagets nya startsida.
 - Hindren i mitten följer samma blocklayout som i den första prototypen: långa väggar, lådor, låga balkar och ett mittblock, spegelvänt runt mitten.
 - Skyttarna står på upphöjda U-formade plattformar som omsluter varje kortsida. Armarna går längs långsidorna över zon 2 och 1. Nät bakom och utanför plattformarna fångar missade skott.
 
@@ -54,4 +54,4 @@ Varje skytt, även datorns, har **60 skott per magasin** och laddar om på 2,5 s
 5. **Power-ups:** två per omgång, när det är 45 s och 22 s kvar. Varje lag får en egen måltavla på sidan av banan med 10 träffpoäng. Laget som skjuter ner sin först väljer power-up.
 6. **Säkerhet:** nät bakom och utanför plattformarna.
 7. **Tiebreak:** om båda lagen passerar målet i samma omgång vinner högst summa. Vid lika poäng körs en förlängningsomgång.
-8. **Plattformar:** lagen byter inte plattform.
+8. **Plattformar:** skyttarna byter plattform med sina hundar varje omgång. Hundar startar alltid på samma sida som sina egna skyttar, aldrig på motståndarnas sida.

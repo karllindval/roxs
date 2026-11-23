@@ -298,7 +298,7 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
       </div>
       <button type="button" class="go" id="start">Starta match</button>
     </div>
-    <p class="note">Husregler för de öppna frågorna: hit-räknaren nollställs efter offline, knuffar är tillåtna, två power-ups per omgång (vid 45 och 22 s kvar), nät runt plattformarna, högst summa vinner om båda passerar målet i samma omgång och vid lika körs en omgång till. Lagen byter inte plattform.</p>
+    <p class="note">Husregler för de öppna frågorna: hit-räknaren nollställs efter offline, knuffar är tillåtna, två power-ups per omgång (vid 45 och 22 s kvar), nät runt plattformarna, högst summa vinner om båda passerar målet i samma omgång och vid lika körs en omgång till. Skyttarna byter plattform med sina hundar varje omgång, så hundar och motståndarens skyttar startar aldrig på samma sida.</p>
   </div>
 </div>
 
@@ -474,8 +474,13 @@ function deckRects(team) {
     { x: f(-24.6, -8), z: [8, 10] },        // arm along the other
   ];
 }
+// DECKS.blue is the left U and DECKS.red the right U. Shooters stand on the U at the end their dogs start from,
+// so the teams swap platforms every round.
 const DECKS = { blue: deckRects('blue'), red: deckRects('red') };
-const onDeck = (team, x, z) => DECKS[team].some(r => x >= r.x[0] + 0.25 && x <= r.x[1] - 0.25 && z >= r.z[0] + 0.25 && z <= r.z[1] - 0.25);
+const startSide = (team) => -att(team);
+const deckKey = (team) => startSide(team) < 0 ? 'blue' : 'red';
+const deckOwner = (key) => deckKey('blue') === key ? 'blue' : 'red';
+const onDeck = (team, x, z) => DECKS[deckKey(team)].some(r => x >= r.x[0] + 0.25 && x <= r.x[1] - 0.25 && z >= r.z[0] + 0.25 && z <= r.z[1] - 0.25);
 
 // ---------- audio & haptics ----------
 let actx = null, muted = false;
@@ -776,8 +781,11 @@ function afterScore() {
       hits: 0, shield: 0, offline: 0, dead: false, reboots: REBOOTS, stuck: 0, sideT: 0, flash: 0 });
   }
   G.shots = []; G.splats = [];
-  for (const t of Object.values(G.teams)) for (const sh of t.shooters) { sh.mag = MAG; sh.reload = 0; sh.target = null; }
-  showBanner(G.overtime ? `OMGÅNG ${G.round} · FÖRLÄNGNING` : `OMGÅNG ${G.round} · VÄND`, `Blå anfaller ${G.dir > 0 ? 'höger' : 'vänster'} sida`, 2.6);
+  for (const t of Object.values(G.teams)) for (const sh of t.shooters) {
+    if (Math.sign(sh.x) !== startSide(sh.team)) { sh.x = -sh.x; sh.yaw = Math.PI - sh.yaw; } // walk over to the other U
+    sh.mag = MAG; sh.reload = 0; sh.target = null;
+  }
+  showBanner(G.overtime ? `OMGÅNG ${G.round} · FÖRLÄNGNING` : `OMGÅNG ${G.round} · BYT SIDA`, `Blå startar ${G.dir > 0 ? 'vänster' : 'höger'} och anfaller ${G.dir > 0 ? 'höger' : 'vänster'} sida`, 2.6);
 }
 function gameOver(winner) {
   G.phase = 'over';
@@ -882,6 +890,10 @@ for (const team of ['blue', 'red']) {
   scene.add(g); attackTint[team] = g;
 }
 function placeAttackTint() {
+  for (const key of ['blue', 'red']) {
+    const c = TEAM[deckOwner(key)];
+    deckMats[key].deckMat.color.setHex(c.dark); deckMats[key].railMat.color.setHex(c.body); deckMats[key].railMat.emissive.setHex(c.body);
+  }
   for (const team of ['blue', 'red']) {
     const a = att(team), g = attackTint[team];
     g.position.set(a * (ZB.z1 + HX) / 2, 0, 0); g.rotation.y = a > 0 ? 0 : Math.PI;
@@ -913,11 +925,13 @@ for (const s of OBST) {
   m.position.set(s.x, s.h / 2, s.z); m.castShadow = m.receiveShadow = true; scene.add(m);
 }
 
-// U platforms
+// U platforms (recoloured each round for the team standing on them)
+const deckMats = {};
 for (const team of ['blue', 'red']) {
   const col = TEAM[team];
   const deckMat = new THREE.MeshStandardMaterial({ color: col.dark, roughness: 0.6 });
   const railMat = new THREE.MeshStandardMaterial({ color: col.body, emissive: col.body, emissiveIntensity: 0.3 });
+  deckMats[team] = { deckMat, railMat };
   const legMat = new THREE.MeshStandardMaterial({ color: 0x2b3033, roughness: 0.8 });
   for (const r of DECKS[team]) {
     const w = r.x[1] - r.x[0], d = r.z[1] - r.z[0], cx = (r.x[0] + r.x[1]) / 2, cz = (r.z[0] + r.z[1]) / 2;
@@ -1083,7 +1097,7 @@ const mini = $('mini'), mctx = mini.getContext('2d');
 function drawMini() {
   const w = mini.width, h = mini.height, k = w / 52, X = (x) => (x + 26) * k, Z = (z) => (z + 11) * k;
   mctx.clearRect(0, 0, w, h);
-  for (const team of ['blue', 'red']) for (const r of DECKS[team]) { mctx.fillStyle = team === 'blue' ? 'rgba(47,124,246,0.45)' : 'rgba(240,82,58,0.45)'; mctx.fillRect(X(r.x[0]), Z(r.z[0]), (r.x[1] - r.x[0]) * k, (r.z[1] - r.z[0]) * k); }
+  for (const key of ['blue', 'red']) for (const r of DECKS[key]) { mctx.fillStyle = deckOwner(key) === 'blue' ? 'rgba(47,124,246,0.45)' : 'rgba(240,82,58,0.45)'; mctx.fillRect(X(r.x[0]), Z(r.z[0]), (r.x[1] - r.x[0]) * k, (r.z[1] - r.z[0]) * k); }
   mctx.fillStyle = '#2b2f32'; mctx.fillRect(X(-HX), Z(-HZ), 2 * HX * k, 2 * HZ * k);
   for (const team of ['blue', 'red']) { const a = att(team), x0 = a > 0 ? ZB.z1 : -HX; mctx.fillStyle = team === 'blue' ? 'rgba(47,124,246,0.28)' : 'rgba(240,82,58,0.28)'; mctx.fillRect(X(x0), Z(-HZ), (HX - ZB.z1) * k, 2 * HZ * k); }
   mctx.strokeStyle = 'rgba(238,241,238,0.4)'; mctx.lineWidth = 1;
