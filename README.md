@@ -1,42 +1,56 @@
 # Robot Rush
 
-En spelbar webbprototyp av regelutkastet *ROBOT RUSH v0.1*. Två lag kör robothundar över samma hinderbana medan skyttarna på plattformarna skjuter gel mot motståndarens hundar.
+En spelbar webbprototyp av regelutkastet *ROBOT RUSH v0.1*, med banan från whiteboard-skissen.
 
-- `index.html`: 3D-mobilspelet (three.js r128 från cdnjs). Fungerar stående och liggande på mobil, och med tangentbord och mus på dator.
+- `index.html`: 3D-mobilspelet i förstapersonsvy (three.js r128 från cdnjs). Fungerar stående och liggande på mobil, och med tangentbord och mus på dator.
 - `classic-2d.html`: den första 2D-prototypen för dator.
 
 Öppna filen i en webbläsare. Inget byggsteg behövs.
 
-## Kontroller (3D)
+## Banan
+
+- Lagen startar på var sin kortsida och kör mot motståndarens sida.
+- Zonerna är speglade: **2 · 1 · mitten · 1 · 2**. Ett lag får poäng i zonerna på den sida det anfaller, alltså 1 eller 2 poäng per hund och högst 6 per omgång.
+- Nästa omgång vänder lagen och kör tillbaka från där hundarna står.
+- Hindren i mitten följer samma blocklayout som i den första prototypen: långa väggar, lådor, låga balkar och ett mittblock, spegelvänt runt mitten.
+- Skyttarna står på upphöjda U-formade plattformar som omsluter varje kortsida. Armarna går längs långsidorna över zon 2 och 1. Nät bakom och utanför plattformarna fångar missade skott.
+
+## Roller
+
+Välj roll i menyn:
+
+- **Hund:** du styr en robothund genom dess kamera, eller med en kamera bakom hunden. Dina tre skyttar sköts av datorn. Byt hund med hundkorten.
+- **Skytt:** du står på den blå plattformen i förstapersonsvy och kan gå runt på hela U:et. Dina hundar och de andra två skyttarna sköts av datorn.
+
+Varje skytt, även datorns, har **60 skott per magasin** och laddar om på 2,5 s. Kulorna följer en riktig kastbana med gravitation. En ring på banan visar var nästa kula landar.
+
+## Kontroller
 
 | Mobil | Dator | Vad det gör |
 |---|---|---|
-| Dra nere till vänster | W A S D / piltangenter | Styr vald hund (virtuell joystick) |
-| Tryck på hundkorten | 1 2 3 / Tab | Byt hund. De andra två kör själva. |
-| Tryck och håll på banan | Mus (håll inne) | Sikta och skjut från mitten av den blå plattformen. Sikte nära en röd hund låser på den. |
-| Knappar i rutan | Q / E | Välj Fart eller Sköld när ditt lag har vunnit en power-up |
+| Dra med vänster tumme | W A S D | Gå/kör |
+| Dra med höger tumme | Mus (klicka för att låsa) / piltangenter | Titta och svänga |
+| Håll SKJUT (och dra för att sikta) | Klick / mellanslag | Skjut |
+| LADDA | R | Ladda om |
+| ZOOM | Z / högerklick | Zooma |
+| Hundkorten | 1 2 3 / Tab | Byt hund (hundrollen) |
+| Vy | V | Hundkamera eller kamera bakom |
+| Knappar i rutan | Q / E | Välj Fart eller Sköld |
 | II | P / Esc | Paus |
-| Vy | V | Växla mellan hela banan och en kamera som följer din hund |
 
-Stående visar banan från den blå plattformen. Liggande visar den från sidan.
+## Övriga regler
 
-## Regler i prototypen
-
-- Varje lag har 3 hundar och 3 skyttar. Du är blått lag och spelar mot CPU (Lätt, Normal eller Svår).
 - Omgångar på 60 s. Man spelar till 21 eller 11 poäng.
-- Banan har 6 zoner värda **0 · 1 · 1 · 2 · 3 · 4** i färdriktningen. När klockan når noll får varje hund värdet på zonen den står i.
-- Nästa omgång körs åt andra hållet, med start där hundarna står. Ingen reset.
 - 28 träffar slår ut en hund i 4 s. Vådaskott räknas.
 - Hundarna går i 75 % fart. Fartboost ger 100 % i 5 s.
-- Gelkulorna flyger i en båge från den upphöjda plattformen. En kula träffar bara det som den når i rätt höjd, så den passerar över hundar och skydd nära plattformen och kan stoppas av skydd nära målet.
 
-## Svar på de öppna frågorna (husregler i den här versionen)
+## Husregler för de öppna frågorna
 
-1. **Zoner:** 6 zoner värda 0, 1, 1, 2, 3, 4. Max 12 poäng per lag och omgång.
+1. **Zoner:** 2 · 1 · mitten · 1 · 2, enligt skissen. Laget får poäng på den sida det anfaller.
 2. **Offline:** 4 s. Hit-räknaren nollställs efter offline.
 3. **Sköld:** 12 extra träffar per hund. Skölden gäller tills den går sönder.
 4. **Kontakt:** Knuffar och blockeringar är tillåtna. Det går inte att välta en hund.
-5. **Power-ups:** två per omgång, när det är 45 s och 22 s kvar. Varje lag får en egen måltavla med 10 träffpoäng. Laget som skjuter ner sin först väljer power-up och båda måltavlorna släcks.
-6. **Säkerhet:** nät bakom båda plattformarna fångar skott som missar.
+5. **Power-ups:** två per omgång, när det är 45 s och 22 s kvar. Varje lag får en egen måltavla på sidan av banan med 10 träffpoäng. Laget som skjuter ner sin först väljer power-up.
+6. **Säkerhet:** nät bakom och utanför plattformarna.
 7. **Tiebreak:** om båda lagen passerar målet i samma omgång vinner högst summa. Vid lika poäng körs en förlängningsomgång.
 8. **Plattformar:** lagen byter inte plattform.
