@@ -9,9 +9,10 @@ En spelbar webbprototyp av regelutkastet *ROBOT RUSH v0.1*, med banan från whit
 
 ## Banan
 
-- Lagen startar på var sin kortsida och kör mot motståndarens sida.
-- Zonerna är speglade: **2 · 1 · mitten · 1 · 2**. Ett lag får poäng i zonerna på den sida det anfaller, alltså 1 eller 2 poäng per hund och högst 6 per omgång.
-- Nästa omgång vänder lagen och kör tillbaka från där hundarna står.
+- Lagen startar längst bak på var sin kortsida och kör mot motståndarens sida.
+- Zonerna är speglade: **3 · 2 · 1 · mitten · 1 · 2 · 3**. Ett lag får poäng i zonerna på den sida det anfaller.
+- Omgången blåses av när den första hunden når 3-zonen, när alla hundar är utslagna eller står i 3-zonen, eller efter 60 s. Då får varje hund poängen för zonen den står i.
+- Varje omgång startar om från början: hundarna ställs längst bak, på motsatt sida mot förra omgången. Träffar, reboots och sköldar nollställs.
 - Hindren i mitten följer samma blocklayout som i den första prototypen: långa väggar, lådor, låga balkar och ett mittblock, spegelvänt runt mitten.
 - Skyttarna står på upphöjda U-formade plattformar som omsluter varje kortsida. Armarna går längs långsidorna över zon 2 och 1. Nät bakom och utanför plattformarna fångar missade skott.
 
@@ -41,13 +42,12 @@ Varje skytt, även datorns, har **60 skott per magasin** och laddar om på 2,5 s
 ## Övriga regler
 
 - Omgångar på 60 s. Man spelar till 21 eller 11 poäng.
-- 28 träffar slår ut en hund i 4 s. Varje hund har **en reboot per omgång**: slås den ut en andra gång är den ute resten av omgången. Den står kvar som hinder och får poängen för zonen där den stannade. Är alla hundar utskjutna tar omgången slut direkt. Alla hundar startar om inför nästa omgång. Vådaskott räknas.
-- Datorns hundar väntar bakom skydd och springer mot 2-zonen när det är lagom mycket tid kvar.
+- 28 träffar slår ut en hund i 4 s. Varje hund har **en reboot per omgång**: slås den ut en andra gång är den ute resten av omgången. Den står kvar som hinder och får poängen för zonen där den stannade. Vådaskott räknas.
 - Hundarna går i 75 % fart. Fartboost ger 100 % i 5 s.
 
 ## Husregler för de öppna frågorna
 
-1. **Zoner:** 2 · 1 · mitten · 1 · 2, enligt skissen. Laget får poäng på den sida det anfaller.
+1. **Zoner:** 3 · 2 · 1 · mitten · 1 · 2 · 3. Laget får poäng på den sida det anfaller, och 3-zonen blåser av omgången.
 2. **Offline:** 4 s. Hit-räknaren nollställs efter offline. Bara en reboot per hund och omgång.
 3. **Sköld:** 12 extra träffar per hund. Skölden gäller tills den går sönder.
 4. **Kontakt:** Knuffar och blockeringar är tillåtna. Det går inte att välta en hund.

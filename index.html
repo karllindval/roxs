@@ -244,7 +244,7 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
 <div id="sum" hidden>
   <span class="h" id="sum-h">SLUT PÅ OMGÅNG 1</span>
   <div class="g"><span class="b" id="sum-b">+0</span><span class="r" id="sum-r">+0</span></div>
-  <span class="n" id="sum-n">Ingen reset. Nästa omgång går tillbaka från där hundarna står.</span>
+  <span class="n" id="sum-n">Tiden är ute.</span>
 </div>
 <div id="pops"></div>
 
@@ -253,7 +253,7 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
     <div class="brand">
       <span class="eyebrow">Regelutkast v0.1 · bana enligt whiteboard</span>
       <h1><span class="b">Robot</span> <span class="r">Rush</span></h1>
-      <p>Lagen startar på var sin kortsida och kör mot motståndarens sida. Zonerna är speglade: 2 · 1 · mitten · 1 · 2. Varje lag får poäng i zonerna på den sida det anfaller. Skyttarna står på U-formade plattformar runt kortsidorna.</p>
+      <p>Lagen startar på var sin kortsida och kör mot motståndarens sida. Zonerna är speglade: 3 · 2 · 1 · mitten · 1 · 2 · 3. Varje lag får poäng i zonerna på den sida det anfaller. Första hund in i 3-zonen blåser av omgången. Skyttarna står på U-formade plattformar runt kortsidorna.</p>
     </div>
     <div class="roles" id="roles">
       <button type="button" class="role" id="r-dog" data-v="dog" aria-pressed="true"><b>Hund</b><span>Styr en robothund genom dess kamera. Dina skyttar täcker dig.</span></button>
@@ -264,9 +264,10 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
         <h2>Regler</h2>
         <ul>
           <li>Omgångar på 60 s. Först till målpoäng vinner.</li>
-          <li>Vid noll får varje hund 1 eller 2 poäng om den står i zonerna på sidan laget anfaller.</li>
-          <li>Nästa omgång vänder: lagen kör tillbaka från där de står.</li>
-          <li>28 träffar slår ut en hund i 4 s. Varje hund har <b>en reboot per omgång</b>: slås den ut igen är den ute resten av omgången och får poängen för zonen där den stannade. Är alla hundar utskjutna tar omgången slut. Vådaskott räknas.</li>
+          <li>När omgången blåses av får varje hund 1, 2 eller 3 poäng efter zonen den står i, på sidan laget anfaller.</li>
+          <li>Omgången blåses av när en hund når 3-zonen, när alla hundar är utslagna eller i 3-zonen, eller efter 60 s.</li>
+          <li>Varje omgång startar om: hundarna ställs längst bak på motsatt sida mot förra omgången.</li>
+          <li>28 träffar slår ut en hund i 4 s. Varje hund har <b>en reboot per omgång</b>: slås den ut igen är den ute resten av omgången och får poängen för zonen där den stannade. Vådaskott räknas.</li>
           <li>Magasinet rymmer 60 skott. Tomt magasin betyder omladdning, 2,5 s.</li>
           <li>Skjut ner lagets måltavla först och välj <b>Fart</b> (100&nbsp;% i 5&nbsp;s) eller <b>Sköld</b> (12 extra träffar).</li>
         </ul>
@@ -330,7 +331,7 @@ if (!window.THREE) { $('err').hidden = false; $('menu').hidden = true; return; }
 // World (units ≈ 0.7 m). X runs along the course (blue end at -X), Z across it.
 // =====================================================================
 const HX = 21, HZ = 7;                         // course half-length / half-width
-const ZB = { z2: 13.5, z1: 8 };                // zone boundaries from the centre
+const ZB = { z3: 17.5, z2: 12, z1: 8 };       // zone boundaries from the centre
 const ROUND_TIME = 60, HIT_LIMIT = 28, OFFLINE_T = 4, SHIELD_HITS = 12, BOOST_T = 5;
 const REBOOTS = 1; // per dog and round; the next knockout puts the dog out until the round ends
 const MAG = 60, RELOAD_T = 2.5;
@@ -355,7 +356,8 @@ const rnd = (a, b) => a + Math.random() * (b - a);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
 // Zones are mirrored: 2 · 1 · middle · 1 · 2. A team scores on the side it attacks.
-const zoneVal = (x, att) => att > 0 ? (x >= ZB.z2 ? 2 : x >= ZB.z1 ? 1 : 0) : (x <= -ZB.z2 ? 2 : x <= -ZB.z1 ? 1 : 0);
+const zoneVal = (x, att) => { const p = att > 0 ? x : -x; return p >= ZB.z3 ? 3 : p >= ZB.z2 ? 2 : p >= ZB.z1 ? 1 : 0; };
+const START_X = HX - 1.2; // start line at the back of each short end
 const prog = (x, att) => clamp(att > 0 ? (x + HX) / (2 * HX) : (HX - x) / (2 * HX), 0, 1);
 
 // ---------- course obstacles (from the whiteboard sketch) ----------
@@ -418,7 +420,7 @@ function buildFlow(att, seedFn) {
     const idx = j * GC + i; if (blocked[idx]) continue;
     const x = -HX + (i + 0.5) * CELL;
     const z = -HZ + (j + 0.5) * CELL;
-    if (seedFn ? seedFn(x, z) : (att > 0 ? x > ZB.z2 + 0.6 : x < -ZB.z2 - 0.6)) { dist[idx] = 0; push(0, idx); }
+    if (seedFn ? seedFn(x, z) : (att > 0 ? x > ZB.z3 + 0.4 : x < -ZB.z3 - 0.4)) { dist[idx] = 0; push(0, idx); }
   }
   while (heap.length) {
     const [d, idx] = pop(); if (d > dist[idx]) continue;
@@ -441,19 +443,6 @@ function flowDist(x, z, f) {
   if (best === Infinity) for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) { const ni = i + dx, nj = j + dy; if (ni >= 0 && nj >= 0 && ni < GC && nj < GR) best = Math.min(best, f[nj * GC + ni] + Math.hypot(dx, dy)); }
   return best * CELL;
 }
-// Cover spots: the lee side of each block, facing your own platform, per attack direction.
-const SPOTS = { '1': [], '-1': [] };
-for (const a of [1, -1]) for (const s of OBST) {
-  if (s.t !== 'box') continue;
-  const n = s.hz > 0.9 ? [-0.55, 0.55] : [0];
-  for (const off of n) {
-    const x = s.x - a * (s.hx + DOG_R + 0.25), z = s.z + off * s.hz;
-    const i = Math.floor((x + HX) / CELL), j = Math.floor((z + HZ) / CELL);
-    if (blocked[j * GC + i]) continue;
-    SPOTS[a].push({ x, z, flow: null });
-  }
-}
-function spotFlow(sp) { return sp.flow || (sp.flow = buildFlow(0, (x, z) => Math.hypot(x - sp.x, z - sp.z) < 0.3)); }
 function flowDir(x, z, att, field) {
   const f = field || FLOW[att];
   const i = clamp(Math.floor((x + HX) / CELL), 0, GC - 1), j = clamp(Math.floor((z + HZ) / CELL), 0, GR - 1);
@@ -517,9 +506,9 @@ function newGame() {
       id: team, boostUntil: -1,
       shooters: [makeShooter(team, m * 15, -9, 0), makeShooter(team, m * 23.5, 0, 1), makeShooter(team, m * 15, 9, 2)],
       dogs: [-4, 0, 4].map((z, idx) => ({
-        team, idx, x: m * 19.5, z, vx: 0, vz: 0, angle: m > 0 ? Math.PI : 0,
-        hits: 0, shield: 0, offline: 0, reboots: REBOOTS, dead: false, phase: Math.random() * 6, holdZ: [-4.5, 0, 4.5][idx] + rnd(-0.4, 0.4),
-        stuck: 0, side: 0, sideT: 0, flash: 0, planT: 0, spot: null, aggr: Math.random(),
+        team, idx, x: m * START_X, z, vx: 0, vz: 0, angle: m > 0 ? Math.PI : 0,
+        hits: 0, shield: 0, offline: 0, reboots: REBOOTS, dead: false, phase: Math.random() * 6,
+        stuck: 0, side: 0, sideT: 0, flash: 0,
       })),
     };
   }
@@ -690,33 +679,9 @@ function steer(d, wx, wz, dt) { const k = Math.min(1, dt * 7); d.vx += (wx - d.v
 function aiDog(d, dt) {
   const a = att(d.team), cfg = d.team === 'red' ? G.diff : ALLY, max = dogMax(d) * cfg.dogSpeed;
   let want;
-  if (zoneVal(d.x, a) === 2) {
-    const tx = a * 17.4, tz = d.holdZ, dx = tx - d.x, dz = tz - d.z, l = Math.hypot(dx, dz);
-    want = l < 0.25 ? { x: 0, z: 0 } : { x: dx / l, z: dz / l };
-    if (l < 1.5) want = { x: want.x * l / 1.5, z: want.z * l / 1.5 };
-  } else {
-    // Pace the run: wait behind cover until there is just enough time left to reach the 2-zone.
-    const speed = NORMAL * cfg.dogSpeed;
-    d.planT -= dt;
-    if (d.planT <= 0) {
-      d.planT = 0.8;
-      const eta = flowDist(d.x, d.z, FLOW[a]) / speed * 1.3 + 2;
-      const slack = G.timeLeft - eta - (4 + d.aggr * 6);
-      d.spot = null;
-      if (slack > 0) {
-        let best = null, bp = -1;
-        for (const sp of SPOTS[a]) {
-          if (G.teams[d.team].dogs.some(o => o !== d && o.spot === sp)) continue;
-          const p = prog(sp.x, a); if (p < prog(d.x, a) - 0.03) continue;
-          const etaSp = flowDist(sp.x, sp.z, FLOW[a]) / speed * 1.3 + 2 + flowDist(d.x, d.z, spotFlow(sp)) / speed * 1.2;
-          if (etaSp > G.timeLeft - (3 + d.aggr * 4)) continue;
-          if (p > bp) { bp = p; best = sp; }
-        }
-        d.spot = best;
-      }
-    }
-    if (d.spot && Math.hypot(d.spot.x - d.x, d.spot.z - d.z) < 0.5) { steer(d, 0, 0, dt); d.stuck = 0; return; }
-    want = d.spot ? flowDir(d.x, d.z, a, spotFlow(d.spot)) : flowDir(d.x, d.z, a);
+  {
+    // It's a race: the first dog into the 3-zone ends the round.
+    want = flowDir(d.x, d.z, a);
     // keep right when meeting another dog head-on so lanes don't deadlock
     for (const o of G.dogs) {
       if (o === d) continue;
@@ -791,7 +756,7 @@ function drivePlayerShooter(dt) {
 function endRound() {
   const gain = { blue: 0, red: 0 };
   for (const d of G.dogs) { const v = zoneVal(d.x, att(d.team)); gain[d.team] += v; popup(d.x, 2.0, d.z, d.dead ? `UTE +${v}` : `+${v}`, TEAM[d.team].light, 2.8); }
-  G.score.blue += gain.blue; G.score.red += gain.red;
+  G.score.blue += gain.blue; G.score.red += gain.red; G.endLeft = G.timeLeft;
   G.lastGain = gain; G.phase = 'score'; G.freeze = 3;
   G.shots = []; G.pus = []; G.choice = null;
   beep(220, 0.5, 'sawtooth', 0.05); setTimeout(() => beep(330, 0.6, 'sawtooth', 0.05), 180);
@@ -804,7 +769,14 @@ function afterScore() {
   G.dir *= -1; G.round++; G.timeLeft = ROUND_TIME; G.phase = 'play'; G.attackDirty = true;
   G.puQueue = [...PU_SPAWNS];
   for (const t of Object.values(G.teams)) t.boostUntil = -1;
-  for (const d of G.dogs) { d.planT = 0; d.spot = null; d.reboots = REBOOTS; if (d.dead) { d.dead = false; d.offline = 0; d.hits = 0; } }
+  // Every round starts from scratch: dogs line up at the back of the end their team starts from.
+  for (const d of G.dogs) {
+    const a = att(d.team);
+    Object.assign(d, { x: -a * START_X, z: [-4, 0, 4][d.idx], vx: 0, vz: 0, angle: a > 0 ? 0 : Math.PI,
+      hits: 0, shield: 0, offline: 0, dead: false, reboots: REBOOTS, stuck: 0, sideT: 0, flash: 0 });
+  }
+  G.shots = []; G.splats = [];
+  for (const t of Object.values(G.teams)) for (const sh of t.shooters) { sh.mag = MAG; sh.reload = 0; sh.target = null; }
   showBanner(G.overtime ? `OMGÅNG ${G.round} · FÖRLÄNGNING` : `OMGÅNG ${G.round} · VÄND`, `Blå anfaller ${G.dir > 0 ? 'höger' : 'vänster'} sida`, 2.6);
 }
 function gameOver(winner) {
@@ -842,7 +814,11 @@ function update(dt) {
   if (G.role === 'shooter') drivePlayerShooter(dt);
   updateShots(dt);
   if (G.timeLeft <= 0) { G.timeLeft = 0; G.endNote = null; endRound(); }
-  else if (G.dogs.every(d => d.dead)) { G.endNote = 'Alla hundar utskjutna. Omgången är över.'; endRound(); }
+  else {
+    const first = G.dogs.find(d => !d.dead && zoneVal(d.x, att(d.team)) === 3);
+    if (first) { G.endNote = `${TEAM[first.team].name} hund ${first.idx + 1} nådde 3-zonen. Omgången blåses av.`; endRound(); }
+    else if (G.dogs.every(d => d.dead || zoneVal(d.x, att(d.team)) === 3)) { G.endNote = 'Alla hundar utslagna. Omgången blåses av.'; endRound(); }
+  }
 }
 
 // =====================================================================
@@ -875,17 +851,17 @@ function paintField() {
   const c = fc.getContext('2d'), cw = fc.width, ch = fc.height, k = cw / (2 * HX), X = (x) => (x + HX) * k;
   c.fillStyle = '#2b2f32'; c.fillRect(0, 0, cw, ch);
   for (let i = 0; i < 9000; i++) { c.fillStyle = `rgba(${Math.random() < 0.5 ? '255,255,255' : '0,0,0'},${Math.random() * 0.05})`; c.fillRect(Math.random() * cw, Math.random() * ch, 3, 3); }
-  const zones = [[-HX, -ZB.z2, 2], [-ZB.z2, -ZB.z1, 1], [ZB.z1, ZB.z2, 1], [ZB.z2, HX, 2]];
+  const zones = [[-HX, -ZB.z3, 3], [-ZB.z3, -ZB.z2, 2], [-ZB.z2, -ZB.z1, 1], [ZB.z1, ZB.z2, 1], [ZB.z2, ZB.z3, 2], [ZB.z3, HX, 3]];
   for (const [a, b, v] of zones) {
-    c.fillStyle = `rgba(242,194,48,${v === 2 ? 0.09 : 0.05})`; c.fillRect(X(a), 0, X(b) - X(a), ch);
+    c.fillStyle = `rgba(242,194,48,${0.03 + v * 0.03})`; c.fillRect(X(a), 0, X(b) - X(a), ch);
     c.save(); c.translate((X(a) + X(b)) / 2, ch / 2); c.rotate(a < 0 ? Math.PI / 2 : -Math.PI / 2);
-    c.font = `700 ${Math.round(ch * 0.4)}px "Chakra Petch", "Arial Narrow", sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.font = `700 ${Math.round(ch * (v === 3 ? 0.3 : 0.4))}px "Chakra Petch", "Arial Narrow", sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
     c.fillStyle = 'rgba(238,241,238,0.2)'; c.fillText(String(v), 0, 0); c.restore();
   }
   c.strokeStyle = 'rgba(238,241,238,0.55)'; c.lineWidth = 7; c.setLineDash([34, 26]);
-  for (const x of [-ZB.z2, -ZB.z1, ZB.z1, ZB.z2]) { c.beginPath(); c.moveTo(X(x), 0); c.lineTo(X(x), ch); c.stroke(); }
+  for (const x of [-ZB.z3, -ZB.z2, -ZB.z1, ZB.z1, ZB.z2, ZB.z3]) { c.beginPath(); c.moveTo(X(x), 0); c.lineTo(X(x), ch); c.stroke(); }
   c.setLineDash([]); c.lineWidth = 10; c.strokeRect(5, 5, cw - 10, ch - 10);
-  for (const [x, rot] of [[-HX + 1.3, Math.PI / 2], [HX - 1.3, -Math.PI / 2]]) {
+  for (const [x, rot] of [[-HX + 0.45, Math.PI / 2], [HX - 0.45, -Math.PI / 2]]) {
     c.save(); c.translate(X(x), ch / 2); c.rotate(rot); c.font = `700 ${Math.round(ch * 0.07)}px "Chakra Petch", sans-serif`;
     c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = 'rgba(238,241,238,0.35)'; c.fillText('S T A R T', 0, 0); c.restore();
   }
@@ -1111,7 +1087,7 @@ function drawMini() {
   mctx.fillStyle = '#2b2f32'; mctx.fillRect(X(-HX), Z(-HZ), 2 * HX * k, 2 * HZ * k);
   for (const team of ['blue', 'red']) { const a = att(team), x0 = a > 0 ? ZB.z1 : -HX; mctx.fillStyle = team === 'blue' ? 'rgba(47,124,246,0.28)' : 'rgba(240,82,58,0.28)'; mctx.fillRect(X(x0), Z(-HZ), (HX - ZB.z1) * k, 2 * HZ * k); }
   mctx.strokeStyle = 'rgba(238,241,238,0.4)'; mctx.lineWidth = 1;
-  for (const x of [-ZB.z2, -ZB.z1, ZB.z1, ZB.z2]) { mctx.beginPath(); mctx.moveTo(X(x), Z(-HZ)); mctx.lineTo(X(x), Z(HZ)); mctx.stroke(); }
+  for (const x of [-ZB.z3, -ZB.z2, -ZB.z1, ZB.z1, ZB.z2, ZB.z3]) { mctx.beginPath(); mctx.moveTo(X(x), Z(-HZ)); mctx.lineTo(X(x), Z(HZ)); mctx.stroke(); }
   mctx.fillStyle = '#8a8f86';
   for (const s of OBST) {
     if (s.t === 'cyl') { mctx.beginPath(); mctx.arc(X(s.x), Z(s.z), Math.max(1.5, s.r * k), 0, Math.PI * 2); mctx.fill(); }
@@ -1261,7 +1237,7 @@ function updateHUD(time, dt) {
   const ch = G.choice && G.choice.team === 'blue';
   $('choice').hidden = !ch; if (ch) setText('choice-t', `MÅLET NERE! VÄLJ POWER-UP (${Math.ceil(G.choice.t)})`);
   $('sum').hidden = G.phase !== 'score';
-  if (G.phase === 'score' && G.lastGain) { setText('sum-h', `SLUT PÅ OMGÅNG ${G.round}`); setText('sum-b', `+${G.lastGain.blue}`); setText('sum-r', `+${G.lastGain.red}`); setText('sum-n', G.endNote || 'Ingen reset. Nästa omgång går tillbaka från där hundarna står.'); }
+  if (G.phase === 'score' && G.lastGain) { setText('sum-h', `SLUT PÅ OMGÅNG ${G.round}`); setText('sum-b', `+${G.lastGain.blue}`); setText('sum-r', `+${G.lastGain.red}`); setText('sum-n', (G.endNote || 'Tiden är ute.') + ' Lagen byter sida.'); }
   const early = G.round === 1 && G.timeLeft > 52 && G.phase === 'play' && isTouch;
   $('hintL').hidden = !early; $('hintR').hidden = !early;
   drawMini();
