@@ -244,7 +244,7 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
 <div id="sum" hidden>
   <span class="h" id="sum-h">SLUT PÅ OMGÅNG 1</span>
   <div class="g"><span class="b" id="sum-b">+0</span><span class="r" id="sum-r">+0</span></div>
-  <span class="n">Ingen reset. Nästa omgång går tillbaka från där hundarna står.</span>
+  <span class="n" id="sum-n">Ingen reset. Nästa omgång går tillbaka från där hundarna står.</span>
 </div>
 <div id="pops"></div>
 
@@ -266,7 +266,7 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
           <li>Omgångar på 60 s. Först till målpoäng vinner.</li>
           <li>Vid noll får varje hund 1 eller 2 poäng om den står i zonerna på sidan laget anfaller.</li>
           <li>Nästa omgång vänder: lagen kör tillbaka från där de står.</li>
-          <li>28 träffar slår ut en hund i 4 s. Varje hund har <b>en reboot per omgång</b>: slås den ut igen är den ute resten av omgången och ger 0 poäng. Vådaskott räknas.</li>
+          <li>28 träffar slår ut en hund i 4 s. Varje hund har <b>en reboot per omgång</b>: slås den ut igen är den ute resten av omgången och får poängen för zonen där den stannade. Är alla hundar utskjutna tar omgången slut. Vådaskott räknas.</li>
           <li>Magasinet rymmer 60 skott. Tomt magasin betyder omladdning, 2,5 s.</li>
           <li>Skjut ner lagets måltavla först och välj <b>Fart</b> (100&nbsp;% i 5&nbsp;s) eller <b>Sköld</b> (12 extra träffar).</li>
         </ul>
@@ -790,7 +790,7 @@ function drivePlayerShooter(dt) {
 // ---------- round flow ----------
 function endRound() {
   const gain = { blue: 0, red: 0 };
-  for (const d of G.dogs) { const v = d.dead ? 0 : zoneVal(d.x, att(d.team)); gain[d.team] += v; popup(d.x, 2.0, d.z, d.dead ? 'UTE +0' : `+${v}`, TEAM[d.team].light, 2.8); }
+  for (const d of G.dogs) { const v = zoneVal(d.x, att(d.team)); gain[d.team] += v; popup(d.x, 2.0, d.z, d.dead ? `UTE +${v}` : `+${v}`, TEAM[d.team].light, 2.8); }
   G.score.blue += gain.blue; G.score.red += gain.red;
   G.lastGain = gain; G.phase = 'score'; G.freeze = 3;
   G.shots = []; G.pus = []; G.choice = null;
@@ -841,7 +841,8 @@ function update(dt) {
   }
   if (G.role === 'shooter') drivePlayerShooter(dt);
   updateShots(dt);
-  if (G.timeLeft <= 0) { G.timeLeft = 0; endRound(); }
+  if (G.timeLeft <= 0) { G.timeLeft = 0; G.endNote = null; endRound(); }
+  else if (G.dogs.every(d => d.dead)) { G.endNote = 'Alla hundar utskjutna. Omgången är över.'; endRound(); }
 }
 
 // =====================================================================
@@ -1237,7 +1238,7 @@ function updateHUD(time, dt) {
     const d = playerDog();
     setText('camlbl', `CAM · HUND ${G.sel + 1}${G.teams.blue.boostUntil > G.t ? ' · BOOST' : ''}`);
     $('offline').hidden = !(d.offline > 0 && G.phase === 'play');
-    if (d.dead) setText('offline-t', 'UTE RESTEN AV OMGÅNGEN · BYT HUND');
+    if (d.dead) setText('offline-t', 'UTE · STÅR KVAR OCH RÄKNAS HÄR · BYT HUND');
     else if (d.offline > 0) setText('offline-t', `OFFLINE ${d.offline.toFixed(1)} · SISTA REBOOT`);
     $('b-cam').textContent = dogCam === 'fpv' ? 'Vy: kamera' : 'Vy: bakom';
   } else {
@@ -1260,7 +1261,7 @@ function updateHUD(time, dt) {
   const ch = G.choice && G.choice.team === 'blue';
   $('choice').hidden = !ch; if (ch) setText('choice-t', `MÅLET NERE! VÄLJ POWER-UP (${Math.ceil(G.choice.t)})`);
   $('sum').hidden = G.phase !== 'score';
-  if (G.phase === 'score' && G.lastGain) { setText('sum-h', `SLUT PÅ OMGÅNG ${G.round}`); setText('sum-b', `+${G.lastGain.blue}`); setText('sum-r', `+${G.lastGain.red}`); }
+  if (G.phase === 'score' && G.lastGain) { setText('sum-h', `SLUT PÅ OMGÅNG ${G.round}`); setText('sum-b', `+${G.lastGain.blue}`); setText('sum-r', `+${G.lastGain.red}`); setText('sum-n', G.endNote || 'Ingen reset. Nästa omgång går tillbaka från där hundarna står.'); }
   const early = G.round === 1 && G.timeLeft > 52 && G.phase === 'play' && isTouch;
   $('hintL').hidden = !early; $('hintR').hidden = !early;
   drawMini();

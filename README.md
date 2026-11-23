@@ -41,7 +41,7 @@ Varje skytt, även datorns, har **60 skott per magasin** och laddar om på 2,5 s
 ## Övriga regler
 
 - Omgångar på 60 s. Man spelar till 21 eller 11 poäng.
-- 28 träffar slår ut en hund i 4 s. Varje hund har **en reboot per omgång**: slås den ut en andra gång är den ute resten av omgången, står kvar som hinder och ger 0 poäng. Alla hundar startar om inför nästa omgång. Vådaskott räknas.
+- 28 träffar slår ut en hund i 4 s. Varje hund har **en reboot per omgång**: slås den ut en andra gång är den ute resten av omgången. Den står kvar som hinder och får poängen för zonen där den stannade. Är alla hundar utskjutna tar omgången slut direkt. Alla hundar startar om inför nästa omgång. Vådaskott räknas.
 - Datorns hundar väntar bakom skydd och springer mot 2-zonen när det är lagom mycket tid kvar.
 - Hundarna går i 75 % fart. Fartboost ger 100 % i 5 s.
 
