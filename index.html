@@ -67,7 +67,7 @@ body {
 .clock .r { font: 600 10px var(--f-mono); letter-spacing: 0.08em; color: var(--hazard); max-width: 46vw; text-wrap: balance; }
 #mini {
   position: absolute; left: max(12px, var(--sl)); top: calc(var(--st) + 64px);
-  width: min(210px, 40vw); aspect-ratio: 52 / 22; height: auto;
+  width: min(230px, 42vw); aspect-ratio: 70 / 22; height: auto;
   border: 1px solid var(--line); border-radius: 4px; background: rgba(12,14,15,0.7);
 }
 .tools { position: absolute; right: max(12px, var(--sr)); top: calc(var(--st) + 64px); display: flex; gap: 6px; }
@@ -80,7 +80,7 @@ body {
 @media (orientation: portrait) { .cards { width: calc(100vw - 32px); } }
 /* shooter role: team status sits under the minimap and lets touches through to the joystick */
 .cards.side {
-  left: max(12px, var(--sl)); transform: none; bottom: auto; top: calc(var(--st) + 72px + min(210px, 40vw) * 22 / 52);
+  left: max(12px, var(--sl)); transform: none; bottom: auto; top: calc(var(--st) + 72px + min(230px, 42vw) * 22 / 70);
   flex-direction: column; width: min(150px, 34vw);
 }
 #hud .cards.side .dog { pointer-events: none; padding: 4px 7px; }
@@ -212,7 +212,7 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
     <div class="clock"><span class="t" id="clock">1:00</span><span class="r" id="round">OMGÅNG 1</span></div>
     <div class="team red"><span class="name">Röd · cpu</span><span class="pts" id="sr">0</span><span class="bar"><i id="pr"></i></span></div>
   </div>
-  <canvas id="mini" width="420" height="178" aria-label="Minikarta"></canvas>
+  <canvas id="mini" width="420" height="132" aria-label="Minikarta"></canvas>
   <div class="tools">
     <button type="button" class="tool" id="b-pause" aria-label="Paus">II</button>
     <button type="button" class="tool" id="b-cam">Vy</button>
@@ -238,7 +238,7 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
 <div id="banner" hidden><b id="banner-t"></b><span id="banner-s"></span></div>
 <div id="choice" hidden>
   <p id="choice-t">MÅLET NERE! VÄLJ POWER-UP</p>
-  <div><button type="button" id="c-boost">FART 5 s</button><button type="button" id="c-shield" class="sh">SKÖLD +12</button></div>
+  <div><button type="button" id="c-boost">FART 5 s</button><button type="button" id="c-shield" class="sh">SKÖLD +5</button></div>
 </div>
 <div id="sum" hidden>
   <span class="h" id="sum-h">SLUT PÅ OMGÅNG 1</span>
@@ -252,7 +252,7 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
     <div class="brand">
       <span class="eyebrow">Regelutkast v0.1 · bana enligt whiteboard</span>
       <h1><span class="b">Robot</span> <span class="r">Rush</span></h1>
-      <p>Lagen startar på var sin kortsida och kör mot motståndarens sida. Zonerna är speglade: 3 · 2 · 1 · mitten · 1 · 2 · 3. Varje lag får poäng i zonerna på den sida det anfaller. Första hund in i 3-zonen blåser av omgången. Skyttarna står på U-formade plattformar runt kortsidorna.</p>
+      <p>Lagen startar på var sin kortsida och kör mot motståndarens sida. Zonerna är speglade: 3 · 2 · 1 · mitten · 1 · 2 · 3. Varje lag får poäng i zonerna på den sida det anfaller. Första hund in i 3-zonen blåser av omgången. Skyttarna står på U-formade plattformar runt kortsidorna, med armar fram till mittlinjen.</p>
     </div>
     <div class="roles" id="roles">
       <button type="button" class="role" id="r-dog" data-v="dog" aria-pressed="true"><b>Hund</b><span>Styr en robothund genom dess kamera. Dina skyttar täcker dig.</span></button>
@@ -266,9 +266,9 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
           <li>När omgången blåses av får varje hund 1, 2 eller 3 poäng efter zonen den står i, på sidan laget anfaller.</li>
           <li>Omgången blåses av när en hund når 3-zonen, när alla hundar är utslagna eller i 3-zonen, eller efter 60 s.</li>
           <li>Varje omgång startar om: hundarna ställs längst bak på motsatt sida mot förra omgången.</li>
-          <li>28 träffar slår ut en hund i 4 s. Varje hund har <b>en reboot per omgång</b>: slås den ut igen är den ute resten av omgången och får poängen för zonen där den stannade. Vådaskott räknas.</li>
+          <li>10 träffar slår ut en hund i 4 s. Varje hund har <b>en reboot per omgång</b>: slås den ut igen är den ute resten av omgången och får poängen för zonen där den stannade. Vådaskott räknas.</li>
           <li>Hundarna springer i upp till 20 km/h (75 % i vanlig fart). Skyttarna har en Nerf Rival Nemesis med räckvidd 15–20 m och ett magasin på 100 kulor per omgång. Ingen omladdning.</li>
-          <li>Skjut ner lagets måltavla först och välj <b>Fart</b> (100&nbsp;% i 5&nbsp;s) eller <b>Sköld</b> (12 extra träffar).</li>
+          <li>Skjut ner lagets måltavla först och välj <b>Fart</b> (100&nbsp;% i 5&nbsp;s) eller <b>Sköld</b> (5 extra träffar).</li>
         </ul>
       </div>
       <div class="block">
@@ -329,9 +329,9 @@ if (!window.THREE) { $('err').hidden = false; $('menu').hidden = true; return; }
 // =====================================================================
 // World units are metres. X runs along the course (blue starts at -X), Z across it.
 // =====================================================================
-const HX = 21, HZ = 7;                         // course half-length / half-width
-const ZB = { z3: 17.5, z2: 12, z1: 8 };       // zone boundaries from the centre
-const ROUND_TIME = 60, HIT_LIMIT = 28, OFFLINE_T = 4, SHIELD_HITS = 12, BOOST_T = 5;
+const HX = 30, HZ = 7;                         // course half-length / half-width
+const ZB = { z3: 25, z2: 17, z1: 11 };        // zone boundaries from the centre
+const ROUND_TIME = 60, HIT_LIMIT = 10, OFFLINE_T = 4, SHIELD_HITS = 5, BOOST_T = 5;
 const REBOOTS = 1; // per dog and round; the next knockout puts the dog out until the round ends
 const MAG = 100;                // Nerf Rival Nemesis hopper: one per shooter and round, no reloads
 const FULL = 20 / 3.6, NORMAL = FULL * 0.75; // 20 km/h top speed, 75 % in normal play
@@ -363,20 +363,18 @@ const prog = (x, att) => clamp(att > 0 ? (x + HX) / (2 * HX) : (HX - x) / (2 * H
 const OBST = [];
 function box(x, z, hx, hz, rot, h, kind = 'block') { OBST.push({ t: 'box', x, z, hx, hz, rot, h, c: Math.cos(rot), s: Math.sin(rot), kind }); }
 function cyl(x, z, r, h, kind = 'tower') { OBST.push({ t: 'cyl', x, z, r, h, kind }); }
-// Same block layout as the earlier prototype (mirrored halves plus a centre block),
-// rescaled from its 980 × 556 course to this one.
+// Cover: one half laid out by hand and mirrored, plus a centre pair. Lanes are kept at least ~2.4 m wide.
 {
-  const KX = 2 * HX / 980, KZ = 2 * HZ / 556;
-  const HALF = [
-    { x: 350, y: 156, w: 26, h: 100 },   // long wall, top
-    { x: 350, y: 484, w: 26, h: 100 },   // long wall, bottom
-    { x: 410, y: 340, w: 56, h: 60 },    // crate
-    { x: 515, y: 196, w: 80, h: 24 },    // low bar, top
-    { x: 515, y: 520, w: 80, h: 24 },    // low bar, bottom
+  const HALF = [ // x, z, half-length (x), half-width (z), height
+    [-22, -3.6, 0.5, 1.5, 1.5], [-22, 3.6, 0.5, 1.5, 1.5],   // short walls in front of the 2/3 line
+    [-19, 0, 0.8, 0.8, 1.5],                                 // crate
+    [-15, -4.2, 1.6, 0.4, 1.0], [-15, 4.2, 1.6, 0.4, 1.0],   // low bars
+    [-12, 0, 0.5, 1.4, 1.5],                                 // centre wall at the 1/2 line
+    [-8.5, -3.2, 0.9, 0.9, 1.5], [-8.5, 3.2, 0.9, 0.9, 1.5], // crates
+    [-5, 0, 1.4, 0.5, 1.0],                                  // low bar
   ];
-  const add = (r) => box((r.x + r.w / 2 - 640) * KX, (r.y + r.h / 2 - 370) * KZ, r.w / 2 * KX, r.h / 2 * KZ, 0, 1.5, 'block');
-  for (const r of HALF) { add(r); add({ x: 1280 - r.x - r.w, y: r.y, w: r.w, h: r.h }); }
-  add({ x: 616, y: 330, w: 48, h: 80 }); // centre block
+  for (const [x, z, hx, hz, h] of HALF) { box(x, z, hx, hz, 0, h); box(-x, z, hx, hz, 0, h); }
+  box(0, -3.2, 0.6, 1.2, 0, 1.5); box(0, 3.2, 0.6, 1.2, 0, 1.5);
 }
 
 function local(s, x, z) { const dx = x - s.x, dz = z - s.z; return [dx * s.c + dz * s.s, -dx * s.s + dz * s.c]; }
@@ -468,9 +466,9 @@ function flowDir(x, z, att, field) {
 function deckRects(team) {
   const m = team === 'blue' ? 1 : -1, f = (a, b) => [Math.min(m * a, m * b), Math.max(m * a, m * b)];
   return [
-    { x: f(-24.6, -22.4), z: [-10, 10] },   // base behind the short end
-    { x: f(-24.6, -8), z: [-10, -8] },      // arm along one long side
-    { x: f(-24.6, -8), z: [8, 10] },        // arm along the other
+    { x: f(-HX - 3.6, -HX - 1.4), z: [-10, 10] }, // base behind the short end
+    { x: f(-HX - 3.6, 0), z: [-10, -8] },          // arm along one long side, up to the halfway line
+    { x: f(-HX - 3.6, 0), z: [8, 10] },            // arm along the other
   ];
 }
 // DECKS.blue is the left U and DECKS.red the right U. Shooters stand on the U at the end their dogs start from,
@@ -508,7 +506,7 @@ function newGame() {
     const m = team === 'blue' ? -1 : 1;
     teams[team] = {
       id: team, boostUntil: -1,
-      shooters: [makeShooter(team, m * 11, -9, 0), makeShooter(team, m * 23, 0, 1), makeShooter(team, m * 11, 9, 2)],
+      shooters: [makeShooter(team, m * 10, -9, 0), makeShooter(team, m * (HX + 2.5), 0, 1), makeShooter(team, m * 10, 9, 2)],
       dogs: [-4, 0, 4].map((z, idx) => ({
         team, idx, x: m * START_X, z, vx: 0, vz: 0, angle: m > 0 ? Math.PI : 0,
         hits: 0, shield: 0, offline: 0, reboots: REBOOTS, dead: false, phase: Math.random() * 6,
@@ -526,7 +524,7 @@ function newGame() {
     me: null, attackDirty: true,
   };
   // You start on the near arm of the U, looking across the course; walk anywhere on the deck.
-  G.me = teams.blue.shooters[0]; G.me.yaw = Math.atan2(9, 11);
+  G.me = teams.blue.shooters[0]; G.me.yaw = Math.atan2(9, 6);
 }
 const att = (team) => team === 'blue' ? G.dir : -G.dir;
 const playerDog = () => G.role === 'dog' ? G.teams.blue.dogs[G.sel] : null;
@@ -575,7 +573,7 @@ function trace(p, yaw, pitch, team, opts = {}) {
     v = Math.hypot(vx, vy, vz); vx -= DRAG * v * vx * dt; vz -= DRAG * v * vz * dt; vy -= (GRAV + DRAG * v * vy) * dt;
     x += vx * dt; y += vy * dt; z += vz * dt;
     if (y <= 0) return { x, y: 0, z, what: 'ground' };
-    if (Math.abs(x) > 27 || Math.abs(z) > 13) return { x, y, z, what: 'out' };
+    if (Math.abs(x) > HX + 6 || Math.abs(z) > 13) return { x, y, z, what: 'out' };
     if (Math.abs(x) < HX && Math.abs(z) > HZ && Math.abs(z) < HZ + 0.4 && y < 0.6) return { x, y, z, what: 'board' };
     const o = obstacleAt(x, y, z); if (o) return { x, y, z, what: 'cover' };
     for (const pu of G.pus) if (pu.team === team && Math.hypot(pu.x - x, pu.y - y, pu.z - z) < 0.85) return { x, y, z, what: 'pu', pu };
@@ -651,7 +649,7 @@ function updateShots(dt) {
       const v = Math.hypot(s.vx, s.vy, s.vz); s.vx -= DRAG * v * s.vx * h; s.vz -= DRAG * v * s.vz * h; s.vy -= (GRAV + DRAG * v * s.vy) * h;
       s.x += s.vx * h; s.y += s.vy * h; s.z += s.vz * h; s.age += h;
       if (s.y <= 0) { dead = true; addSplat(s.x, s.z, s.team); break; }
-      if (Math.abs(s.x) > 27 || Math.abs(s.z) > 13 || s.age > 6) { dead = true; break; } // nets
+      if (Math.abs(s.x) > HX + 6 || Math.abs(s.z) > 13 || s.age > 6) { dead = true; break; } // nets
       if (Math.abs(s.x) < HX && Math.abs(s.z) > HZ && Math.abs(s.z) < HZ + 0.4 && s.y < 0.6) { dead = true; break; }
       if (obstacleAt(s.x, s.y, s.z)) { dead = true; break; }
       for (const p of G.pus) if (p.team === s.team && Math.hypot(p.x - s.x, p.y - s.y, p.z - s.z) < 0.85) {
@@ -686,7 +684,7 @@ function applyPower(team, kind) {
   G.choice = null;
   const T = G.teams[team];
   if (kind === 'boost') T.boostUntil = G.t + BOOST_T; else for (const d of T.dogs) d.shield = SHIELD_HITS;
-  showBanner(`${TEAM[team].name.toUpperCase()}: ${kind === 'boost' ? 'FARTBOOST' : 'SKÖLD'}`, kind === 'boost' ? '100 % fart i 5 s' : '12 extra träffar per hund', 1.6);
+  showBanner(`${TEAM[team].name.toUpperCase()}: ${kind === 'boost' ? 'FARTBOOST' : 'SKÖLD'}`, kind === 'boost' ? '100 % fart i 5 s' : '5 extra träffar per hund', 1.6);
   beep(kind === 'boost' ? 600 : 420, 0.3, 'triangle', 0.05, 500);
 }
 
@@ -710,10 +708,10 @@ function aiDog(d, dt) {
       want = { x: want.x - want.z * w, z: want.z + want.x * w };
     }
     { const l = Math.hypot(want.x, want.z) || 1; want = { x: want.x / l, z: want.z / l }; }
-    const sp = Math.hypot(d.vx, d.vz);
+    const sp = d.realSp ?? Math.hypot(d.vx, d.vz); // actual movement, so pushing against a wall or another dog counts as stuck
     if (sp < 0.3) d.stuck += dt; else d.stuck = Math.max(0, d.stuck - dt);
     // Stuck (head-on jam or a ridge in the flow field): break symmetry by sliding across the course for a moment.
-    if (d.stuck > 0.7) { d.side = d.z > 0 ? 1 : -1; if (Math.random() < 0.3) d.side *= -1; d.sideT = 1.1; d.stuck = 0; }
+    if (d.stuck > 0.6) { d.side = d.z > 0 ? -1 : 1; if (Math.abs(d.z) < 3 && Math.random() < 0.5) d.side *= -1; d.sideT = 0.8; d.stuck = 0; }
     if (d.sideT > 0) { d.sideT -= dt; want = { x: want.x * 0.25, z: d.side }; }
   }
   steer(d, want.x * max, want.z * max, dt);
@@ -727,6 +725,7 @@ function drivePlayerDog(d, dt) {
 function physics(dt) {
   const pd = playerDog();
   for (const d of G.dogs) {
+    d.px = d.x; d.pz = d.z;
     if (d.offline > 0) { d.vx *= 0.8; d.vz *= 0.8; }
     d.x += d.vx * dt; d.z += d.vz * dt;
     const sp = Math.hypot(d.vx, d.vz);
@@ -746,6 +745,7 @@ function physics(dt) {
       d.x = clamp(d.x, -HX + DOG_R, HX - DOG_R); d.z = clamp(d.z, -HZ + DOG_R, HZ - DOG_R);
     }
   }
+  for (const d of G.dogs) d.realSp = Math.hypot(d.x - d.px, d.z - d.pz) / Math.max(dt, 1e-4);
 }
 
 // ---------- player shooter ----------
@@ -856,14 +856,14 @@ scene.add(camera);
 scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x1a1c1e, 0.75));
 const sun = new THREE.DirectionalLight(0xfff3e0, 0.95);
 sun.position.set(-10, 30, 14); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 18, bottom: -18, near: 1, far: 80 });
+Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 18, bottom: -18, near: 1, far: 90 });
 sun.shadow.bias = -0.0008; scene.add(sun);
 
 const outer = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0x15181a, roughness: 1 }));
 outer.rotation.x = -Math.PI / 2; outer.position.y = -0.02; outer.receiveShadow = true; scene.add(outer);
 
 // Course floor: painted once, mirrored zones like the sketch.
-const fc = document.createElement('canvas'); fc.width = 2048; fc.height = 683;
+const fc = document.createElement('canvas'); fc.width = 2048; fc.height = Math.round(2048 * HZ / HX);
 const fieldTex = new THREE.CanvasTexture(fc); fieldTex.encoding = THREE.sRGBEncoding; fieldTex.anisotropy = 8;
 function paintField() {
   const c = fc.getContext('2d'), cw = fc.width, ch = fc.height, k = cw / (2 * HX), X = (x) => (x + HX) * k;
@@ -962,7 +962,7 @@ function net(w, h, x, z, rotY) {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
   m.position.set(x, h / 2, z); m.rotation.y = rotY; scene.add(m);
 }
-for (const sx of [-1, 1]) { net(26, 7, sx * 27, 0, Math.PI / 2); net(19, 7, sx * 17.5, -13, 0); net(19, 7, sx * 17.5, 13, 0); }
+for (const sx of [-1, 1]) { net(26, 7, sx * (HX + 6), 0, Math.PI / 2); net(HX + 6, 7, sx * (HX + 6) / 2, -13, 0); net(HX + 6, 7, sx * (HX + 6) / 2, 13, 0); }
 
 // ---------- shooter & dog models ----------
 function makeShooterView(sh) {
@@ -1076,7 +1076,7 @@ let dogCam = 'fpv';
 const camLook = new THREE.Vector3(), camPos = new THREE.Vector3();
 function placeCamera(dt, time) {
   if (!G || !$('menu').hidden || G.phase === 'over') {
-    const a = time * 0.06; camera.position.set(Math.cos(a) * 30, 17, Math.sin(a) * 22); camera.lookAt(0, 0, 0);
+    const a = time * 0.06; camera.position.set(Math.cos(a) * 40, 20, Math.sin(a) * 26); camera.lookAt(0, 0, 0);
     camera.fov = 50; camera.updateProjectionMatrix(); return;
   }
   const portrait = innerHeight > innerWidth;
@@ -1105,7 +1105,7 @@ function placeCamera(dt, time) {
 // ---------- minimap ----------
 const mini = $('mini'), mctx = mini.getContext('2d');
 function drawMini() {
-  const w = mini.width, h = mini.height, k = w / 52, X = (x) => (x + 26) * k, Z = (z) => (z + 11) * k;
+  const w = mini.width, h = mini.height, k = w / (2 * HX + 10), X = (x) => (x + HX + 5) * k, Z = (z) => (z + 11) * k;
   mctx.clearRect(0, 0, w, h);
   for (const key of ['blue', 'red']) for (const r of DECKS[key]) { mctx.fillStyle = deckOwner(key) === 'blue' ? 'rgba(47,124,246,0.45)' : 'rgba(240,82,58,0.45)'; mctx.fillRect(X(r.x[0]), Z(r.z[0]), (r.x[1] - r.x[0]) * k, (r.z[1] - r.z[0]) * k); }
   mctx.fillStyle = '#2b2f32'; mctx.fillRect(X(-HX), Z(-HZ), 2 * HX * k, 2 * HZ * k);
