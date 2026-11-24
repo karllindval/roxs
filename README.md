@@ -18,12 +18,18 @@ En spelbar webbprototyp av regelutkastet *ROBOT RUSH v0.1*, med banan från whit
 
 ## Roller
 
+Den hund eller skytt du inte styr sköts alltid av datorn.
+
 Välj roll i menyn:
 
 - **Hund:** du styr en robothund genom dess kamera, eller med en kamera bakom hunden. Dina fyra skyttar sköts av datorn. Byt hund med hundkorten.
 - **Skytt:** du står på lagets plattform i förstapersonsvy och kan gå runt på hela U:et. Dina hundar och de andra tre skyttarna sköts av datorn.
 
 Skyttarna har en **Nerf Rival Nemesis**: cirka 30 m/s, 8 skott per sekund och en räckvidd på 15–20 m. Kulorna bromsas av luftmotstånd. Varje lag har **fyra skyttar**, två på varje arm av U:et. De rör sig fritt längs plattformen, och datorns skyttar går mot den hund de siktar på för att komma inom räckhåll. Varje skytt har **ett magasin på 100 kulor per omgång** och kan inte ladda om. En ring på banan visar var nästa kula landar. Banan räknas i meter (60 × 14 m).
+
+## Grafik
+
+Allt byggs i koden: robothundar i Spot-stil med traverande gång, skyttar med Nerf Rival Nemesis, ställningsplattformar med galler och räcken, plywoodbunkrar och betongbarriärer, gummigolv och en inomhushall med takbelysning.
 
 ## Kontroller
 
@@ -41,7 +47,7 @@ Skyttarna har en **Nerf Rival Nemesis**: cirka 30 m/s, 8 skott per sekund och en
 ## Övriga regler
 
 - Omgångar på 60 s. Man spelar till 21 eller 11 poäng.
-- 10 träffar slår ut en hund i 4 s. Varje hund har **en reboot per omgång**: slås den ut en andra gång är den ute resten av omgången. Den står kvar som hinder och får poängen för zonen där den stannade. Vådaskott räknas.
+- 10 träffar slår ut en hund i 4 s. Efter en reboot tål hunden inga träffar på 2 s, så att den hinner röra sig. Varje hund har **en reboot per omgång**: slås den ut en andra gång är den ute resten av omgången. Den står kvar som hinder och får poängen för zonen där den stannade. Vådaskott räknas.
 - Hundarna springer i 75 % av 20 km/h (15 km/h). Fartboost ger 100 %, alltså 20 km/h, i 5 s.
 
 ## Husregler för de öppna frågorna
