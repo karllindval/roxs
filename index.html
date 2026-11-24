@@ -110,8 +110,7 @@ body {
 .round-btn { border-radius: 50%; border: 2px solid rgba(238,241,238,0.5); background: rgba(17,20,22,0.55); color: var(--ink); font: 700 12px var(--f-mono); letter-spacing: 0.06em; cursor: pointer; }
 #fire { width: 92px; height: 92px; border-color: var(--blue-light); }
 #fire.on { background: rgba(47,124,246,0.45); }
-#reload, #zoom { width: 58px; height: 58px; font-size: 10px; }
-#reload.need { border-color: var(--hazard); color: var(--hazard); }
+#zoom { width: 58px; height: 58px; font-size: 10px; }
 #zoom.on { background: rgba(238,241,238,0.25); }
 .keyhint { font: 500 10px var(--f-mono); color: rgba(238,241,238,0.55); text-align: right; line-height: 1.5; }
 
@@ -133,7 +132,8 @@ body {
 #joy { position: fixed; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; border: 2px solid rgba(238,241,238,0.35); background: rgba(17,20,22,0.3); pointer-events: none; }
 #joy i { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: rgba(238,241,238,0.7); }
 .hint { position: fixed; bottom: calc(var(--sb) + 110px); font: 600 11px var(--f-mono); color: rgba(238,241,238,0.6); pointer-events: none; line-height: 1.5; }
-#hintL { left: max(20px, var(--sl)); }
+#hintL { left: max(20px, var(--sl)); bottom: calc(var(--sb) + 24px); }
+@media (orientation: portrait) { #hintL { bottom: calc(var(--sb) + 90px); } }
 #hintR { right: max(20px, var(--sr)); text-align: right; bottom: calc(var(--sb) + 200px); }
 
 #banner { position: fixed; left: 0; right: 0; top: 30%; text-align: center; pointer-events: none; display: grid; gap: 6px; padding: 0 16px; }
@@ -221,13 +221,12 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
   <div class="cards" id="cards"></div>
   <div id="gun" hidden>
     <div id="ammo">
-      <div class="row"><span class="lbl" id="ammo-l">MAG</span><span id="ammo-n">60/60</span></div>
+      <div class="row"><span class="lbl" id="ammo-l">NEMESIS</span><span id="ammo-n">100/100</span></div>
       <div class="bar2"><i id="ammo-b"></i></div>
     </div>
-    <div class="keyhint" id="keyhint" hidden>Klick skjut · R ladda om<br>Högerklick/Z zoom · WASD gå</div>
+    <div class="keyhint" id="keyhint" hidden>Klick skjut · Z/högerklick zoom<br>WASD gå på plattformen</div>
     <div class="gunrow" id="gunbtns">
       <button type="button" class="round-btn" id="zoom">ZOOM</button>
-      <button type="button" class="round-btn" id="reload">LADDA</button>
       <button type="button" class="round-btn" id="fire">SKJUT</button>
     </div>
   </div>
@@ -257,7 +256,7 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
     </div>
     <div class="roles" id="roles">
       <button type="button" class="role" id="r-dog" data-v="dog" aria-pressed="true"><b>Hund</b><span>Styr en robothund genom dess kamera. Dina skyttar täcker dig.</span></button>
-      <button type="button" class="role" id="r-shooter" data-v="shooter" aria-pressed="false"><b>Skytt</b><span>Stå på den blå U-plattformen och skjut i förstapersonsvy. 60 skott per magasin.</span></button>
+      <button type="button" class="role" id="r-shooter" data-v="shooter" aria-pressed="false"><b>Skytt</b><span>Stå på U-plattformen med en Nerf Rival Nemesis. 100 kulor per omgång och ingen omladdning.</span></button>
     </div>
     <div class="cols">
       <div class="block">
@@ -268,7 +267,7 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
           <li>Omgången blåses av när en hund når 3-zonen, när alla hundar är utslagna eller i 3-zonen, eller efter 60 s.</li>
           <li>Varje omgång startar om: hundarna ställs längst bak på motsatt sida mot förra omgången.</li>
           <li>28 träffar slår ut en hund i 4 s. Varje hund har <b>en reboot per omgång</b>: slås den ut igen är den ute resten av omgången och får poängen för zonen där den stannade. Vådaskott räknas.</li>
-          <li>Magasinet rymmer 60 skott. Tomt magasin betyder omladdning, 2,5 s.</li>
+          <li>Hundarna springer i upp till 20 km/h (75 % i vanlig fart). Skyttarna har en Nerf Rival Nemesis med räckvidd 15–20 m och ett magasin på 100 kulor per omgång. Ingen omladdning.</li>
           <li>Skjut ner lagets måltavla först och välj <b>Fart</b> (100&nbsp;% i 5&nbsp;s) eller <b>Sköld</b> (12 extra träffar).</li>
         </ul>
       </div>
@@ -276,9 +275,9 @@ button:focus-visible { outline: 2px solid var(--shield); outline-offset: 2px; }
         <h2>Kontroller</h2>
         <ul>
           <li><b>Mobil, liggande rekommenderas:</b> vänster tumme går, höger tumme tittar och svänger.</li>
-          <li><b>Skytt:</b> håll SKJUT och dra samtidigt för att sikta. LADDA laddar om, ZOOM zoomar. Ringen på banan visar var kulan landar.</li>
+          <li><b>Skytt:</b> håll SKJUT och dra samtidigt för att sikta. ZOOM zoomar. Spara kulorna, det finns inga fler förrän nästa omgång. Ringen på banan visar var kulan landar.</li>
           <li><b>Hund:</b> tryck på hundkorten för att byta hund. Vy växlar mellan hundkamera och kamera bakom.</li>
-          <li><b>Dator:</b> WASD går, musen tittar (klicka för att låsa), klick skjuter, R laddar om, Z eller högerklick zoomar, 1–3 byter hund, Q/E väljer power-up, P pausar.</li>
+          <li><b>Dator:</b> WASD går, musen tittar (klicka för att låsa), klick skjuter, Z eller högerklick zoomar, 1–3 byter hund, Q/E väljer power-up, P pausar.</li>
         </ul>
       </div>
     </div>
@@ -328,25 +327,25 @@ const $ = (id) => document.getElementById(id);
 if (!window.THREE) { $('err').hidden = false; $('menu').hidden = true; return; }
 
 // =====================================================================
-// World (units ≈ 0.7 m). X runs along the course (blue end at -X), Z across it.
+// World units are metres. X runs along the course (blue starts at -X), Z across it.
 // =====================================================================
 const HX = 21, HZ = 7;                         // course half-length / half-width
 const ZB = { z3: 17.5, z2: 12, z1: 8 };       // zone boundaries from the centre
 const ROUND_TIME = 60, HIT_LIMIT = 28, OFFLINE_T = 4, SHIELD_HITS = 12, BOOST_T = 5;
 const REBOOTS = 1; // per dog and round; the next knockout puts the dog out until the round ends
-const MAG = 60, RELOAD_T = 2.5;
-const FULL = 1.4, NORMAL = FULL * 0.75;
+const MAG = 100;                // Nerf Rival Nemesis hopper: one per shooter and round, no reloads
+const FULL = 20 / 3.6, NORMAL = FULL * 0.75; // 20 km/h top speed, 75 % in normal play
 const DOG_R = 0.55;
-const SHOT_V = 26, GRAV = 10;
+const SHOT_V = 30, GRAV = 9.81, DRAG = 0.08; // Rival rounds: ~30 m/s, drag gives ~15 m flat and ~20 m max range
 const DECK_H = 2.2, EYE = 1.6;
 const PU_SPAWNS = [45, 22], PU_HP = 10, PU_Y = 1.35;
-const PLAYER_RATE = 10;
+const PLAYER_RATE = 8;          // Nemesis full auto, rounds per second
 const DIFF = {
-  easy:   { rate: 3.5, spread: 0.035, lead: 0.5,  ff: false, dogSpeed: 0.9 },
-  normal: { rate: 5,   spread: 0.025, lead: 0.85, ff: true,  dogSpeed: 0.97 },
-  hard:   { rate: 6.5, spread: 0.016, lead: 1.0,  ff: true,  dogSpeed: 1.0 },
+  easy:   { rate: 5,   spread: 0.05,  lead: 0.5,  ff: false, dogSpeed: 0.9 },
+  normal: { rate: 6.5, spread: 0.035, lead: 0.85, ff: true,  dogSpeed: 0.97 },
+  hard:   { rate: 7.5, spread: 0.025, lead: 1.0,  ff: true,  dogSpeed: 1.0 },
 };
-const ALLY = { rate: 4.5, spread: 0.025, lead: 0.85, ff: true, dogSpeed: 0.97 };
+const ALLY = { rate: 6.5, spread: 0.035, lead: 0.85, ff: true, dogSpeed: 0.97 };
 const TEAM = {
   blue: { body: 0x2f7cf6, dark: 0x1b4a96, light: '#8fc0ff', gel: 0x5fe0ff, css: '#2f7cf6', name: 'Blå' },
   red:  { body: 0xf0523a, dark: 0x93301f, light: '#ffa48f', gel: 0xffb03a, css: '#f0523a', name: 'Röd' },
@@ -501,7 +500,7 @@ try { const s = JSON.parse(localStorage.getItem('robotrush-settings') || 'null')
 
 function makeShooter(team, x, z, idx) {
   const m = team === 'blue' ? 1 : -1;
-  return { team, idx, x, z, y: DECK_H, yaw: m > 0 ? 0 : Math.PI, pitch: 0.12, cool: rnd(0, 1), retarget: 0, target: null, mag: MAG, reload: 0 };
+  return { team, idx, x, z, y: DECK_H, yaw: m > 0 ? 0 : Math.PI, pitch: 0.12, cool: rnd(0, 1), retarget: 0, target: null, mag: MAG, reload: 0, sol: null, solT: 0 };
 }
 function newGame() {
   const teams = {};
@@ -509,7 +508,7 @@ function newGame() {
     const m = team === 'blue' ? -1 : 1;
     teams[team] = {
       id: team, boostUntil: -1,
-      shooters: [makeShooter(team, m * 15, -9, 0), makeShooter(team, m * 23.5, 0, 1), makeShooter(team, m * 15, 9, 2)],
+      shooters: [makeShooter(team, m * 11, -9, 0), makeShooter(team, m * 23, 0, 1), makeShooter(team, m * 11, 9, 2)],
       dogs: [-4, 0, 4].map((z, idx) => ({
         team, idx, x: m * START_X, z, vx: 0, vz: 0, angle: m > 0 ? Math.PI : 0,
         hits: 0, shield: 0, offline: 0, reboots: REBOOTS, dead: false, phase: Math.random() * 6,
@@ -527,7 +526,7 @@ function newGame() {
     me: null, attackDirty: true,
   };
   // You start on the near arm of the U, looking across the course; walk anywhere on the deck.
-  G.me = teams.blue.shooters[0]; G.me.yaw = Math.atan2(9, 15);
+  G.me = teams.blue.shooters[0]; G.me.yaw = Math.atan2(9, 11);
 }
 const att = (team) => team === 'blue' ? G.dir : -G.dir;
 const playerDog = () => G.role === 'dog' ? G.teams.blue.dogs[G.sel] : null;
@@ -537,11 +536,23 @@ const keys = new Set();
 const input = { jx: 0, jy: 0, firing: false, zoom: false };
 
 // ---------- ballistics ----------
-function solveLaunch(p0, tx, ty, tz, v) {
-  const dx = tx - p0.x, dz = tz - p0.z, d = Math.hypot(dx, dz) || 0.01, dy = ty - p0.y;
-  const v2 = v * v, disc = v2 * v2 - GRAV * (GRAV * d * d + 2 * dy * v2);
-  const th = disc < 0 ? Math.PI / 4 : Math.atan((v2 - Math.sqrt(disc)) / (GRAV * d));
-  return { yaw: Math.atan2(dz, dx), pitch: th, t: d / (v * Math.cos(th)) };
+// Foam balls slow down fast, so aim by simulating the flight (pitch found by bisection on the low arc).
+function flight2D(pitch, d, y0, dt = 0.01) {
+  let x = 0, y = y0, vx = SHOT_V * Math.cos(pitch), vy = SHOT_V * Math.sin(pitch), t = 0;
+  while (x < d) {
+    const v = Math.hypot(vx, vy); vx -= DRAG * v * vx * dt; vy -= (GRAV + DRAG * v * vy) * dt;
+    x += vx * dt; y += vy * dt; t += dt;
+    if (y < -1 || t > 3 || vx < 0.5) return { y: -Infinity, t };
+  }
+  return { y, t };
+}
+function solveLaunch(p0, tx, ty, tz) {
+  const dx = tx - p0.x, dz = tz - p0.z, d = Math.hypot(dx, dz) || 0.01, yaw = Math.atan2(dz, dx);
+  let lo = -0.7, hi = 0.5;
+  const top = flight2D(hi, d, p0.y);
+  if (top.y < ty) return { yaw, pitch: hi, t: top.t, ok: false };   // out of range
+  for (let k = 0; k < 14; k++) { const mid = (lo + hi) / 2; if (flight2D(mid, d, p0.y).y < ty) lo = mid; else hi = mid; }
+  return { yaw, pitch: hi, t: flight2D(hi, d, p0.y).t, ok: true };
 }
 function dirFrom(yaw, pitch) { const c = Math.cos(pitch); return { x: c * Math.cos(yaw), y: Math.sin(pitch), z: c * Math.sin(yaw) }; }
 function muzzle(sh) { const f = dirFrom(sh.yaw, sh.pitch); return { x: sh.x + f.x * 0.5, y: sh.y + 1.4 + f.y * 0.5, z: sh.z + f.z * 0.5 }; }
@@ -558,10 +569,11 @@ function dogHit(d, x, y, z) {
 }
 // Trace a shot path; used for AI line-of-fire checks and the player's impact marker.
 function trace(p, yaw, pitch, team, opts = {}) {
-  const f = dirFrom(yaw, pitch); let x = p.x, y = p.y, z = p.z, vx = f.x * SHOT_V, vy = f.y * SHOT_V, vz = f.z * SHOT_V;
+  const f = dirFrom(yaw, pitch); let x = p.x, y = p.y, z = p.z, vx = f.x * SHOT_V, vy = f.y * SHOT_V, vz = f.z * SHOT_V, v;
   const dt = opts.dt || 0.025;
   for (let i = 0; i < (opts.steps || 160); i++) {
-    vy -= GRAV * dt; x += vx * dt; y += vy * dt; z += vz * dt;
+    v = Math.hypot(vx, vy, vz); vx -= DRAG * v * vx * dt; vz -= DRAG * v * vz * dt; vy -= (GRAV + DRAG * v * vy) * dt;
+    x += vx * dt; y += vy * dt; z += vz * dt;
     if (y <= 0) return { x, y: 0, z, what: 'ground' };
     if (Math.abs(x) > 27 || Math.abs(z) > 13) return { x, y, z, what: 'out' };
     if (Math.abs(x) < HX && Math.abs(z) > HZ && Math.abs(z) < HZ + 0.4 && y < 0.6) return { x, y, z, what: 'board' };
@@ -581,38 +593,37 @@ function pickTarget(team, sh, cfg) {
   for (const d of G.teams[opp].dogs) {
     if (d.offline > 0) continue;
     let s = prog(d.x, att(d.team)) * 3 + d.hits / HIT_LIMIT * (d.reboots > 0 ? 1.2 : 2.4) - (d.shield > 0 ? 1.2 : 0) + Math.random() * 0.8;
-    const p0 = muzzle(sh), sol = solveLaunch(p0, d.x, 0.55, d.z, SHOT_V), tr = trace(p0, sol.yaw, sol.pitch, team);
-    if (tr.what === 'cover') s -= 10;
+    const p0 = muzzle(sh), sol = solveLaunch(p0, d.x, 0.55, d.z), tr = trace(p0, sol.yaw, sol.pitch, team);
+    if (!sol.ok) s -= 20;
+    else if (tr.what === 'cover') s -= 10;
     else if (tr.what === 'dog' && tr.dog.team === team && cfg.ff) s -= 10;
     if (s > bs) { bs = s; best = d; }
   }
   if (!best || bs < -5) return null;
   return { dog: best };
 }
-function tickGun(sh, dt) {
-  if (sh.reload > 0) { sh.reload -= dt; if (sh.reload <= 0) { sh.reload = 0; sh.mag = MAG; if (sh === G.me) beep(700, 0.08, 'square', 0.03, 300); } }
-}
-function startReload(sh) { if (sh.reload > 0 || sh.mag === MAG) return; sh.reload = RELOAD_T; if (sh === G.me) beep(260, 0.12, 'square', 0.03, -60); }
 function aiShooter(sh, cfg, dt) {
-  tickGun(sh, dt);
-  sh.cool -= dt; sh.retarget -= dt;
+  if (sh.mag <= 0) return;             // hopper empty for the rest of the round
+  sh.cool -= dt; sh.retarget -= dt; sh.solT -= dt;
   if (sh.retarget <= 0) { sh.target = pickTarget(sh.team, sh, cfg); sh.retarget = rnd(0.5, 1.3); }
   const tg = sh.target; if (!tg) return;
   if (tg.pu && !G.pus.includes(tg.pu)) { sh.target = null; return; }
   if (tg.dog && tg.dog.offline > 0) { sh.retarget = 0; return; }
-  let tx, ty, tz;
-  if (tg.pu) { tx = tg.pu.x; ty = tg.pu.y; tz = tg.pu.z; }
-  else {
-    const d = tg.dog, p0 = muzzle(sh); let sol = solveLaunch(p0, d.x, 0.55, d.z, SHOT_V);
-    tx = d.x + d.vx * sol.t * cfg.lead; tz = d.z + d.vz * sol.t * cfg.lead; ty = 0.55;
+  if (sh.solT <= 0 || !sh.sol) {
+    let tx, ty, tz;
+    if (tg.pu) { tx = tg.pu.x; ty = tg.pu.y; tz = tg.pu.z; }
+    else {
+      const d = tg.dog, p0 = muzzle(sh), first = solveLaunch(p0, d.x, 0.55, d.z);
+      tx = d.x + d.vx * first.t * cfg.lead; tz = d.z + d.vz * first.t * cfg.lead; ty = 0.55;
+    }
+    sh.sol = solveLaunch(muzzle(sh), tx, ty, tz); sh.solT = 0.12;
   }
-  const sol = solveLaunch(muzzle(sh), tx, ty, tz, SHOT_V);
+  const sol = sh.sol;
   // turn smoothly toward the solution
   let dy = sol.yaw - sh.yaw; while (dy > Math.PI) dy -= 2 * Math.PI; while (dy < -Math.PI) dy += 2 * Math.PI;
   sh.yaw += dy * Math.min(1, dt * 8); sh.pitch += (sol.pitch - sh.pitch) * Math.min(1, dt * 8);
-  if (sh.cool > 0 || sh.reload > 0) return;
-  if (sh.mag <= 0) { startReload(sh); return; }
-  if (Math.abs(dy) > 0.25) return;
+  if (!sol.ok) { sh.retarget = Math.min(sh.retarget, 0.2); return; }  // save the hopper: don't fire out of range
+  if (sh.cool > 0 || Math.abs(dy) > 0.25) return;
   spawnShot(sh.team, muzzle(sh), sh.yaw + gauss() * cfg.spread, sh.pitch + gauss() * cfg.spread);
   sh.mag--; sh.cool = (1 / cfg.rate) * rnd(0.7, 1.3);
 }
@@ -637,7 +648,8 @@ function updateShots(dt) {
   for (const s of G.shots) {
     let dead = false;
     for (let k = 0; k < sub && !dead; k++) {
-      s.vy -= GRAV * h; s.x += s.vx * h; s.y += s.vy * h; s.z += s.vz * h; s.age += h;
+      const v = Math.hypot(s.vx, s.vy, s.vz); s.vx -= DRAG * v * s.vx * h; s.vz -= DRAG * v * s.vz * h; s.vy -= (GRAV + DRAG * v * s.vy) * h;
+      s.x += s.vx * h; s.y += s.vy * h; s.z += s.vz * h; s.age += h;
       if (s.y <= 0) { dead = true; addSplat(s.x, s.z, s.team); break; }
       if (Math.abs(s.x) > 27 || Math.abs(s.z) > 13 || s.age > 6) { dead = true; break; } // nets
       if (Math.abs(s.x) < HX && Math.abs(s.z) > HZ && Math.abs(s.z) < HZ + 0.4 && s.y < 0.6) { dead = true; break; }
@@ -691,10 +703,10 @@ function aiDog(d, dt) {
     for (const o of G.dogs) {
       if (o === d) continue;
       const dx = o.x - d.x, dz = o.z - d.z, dist = Math.hypot(dx, dz);
-      if (dist > 2.6 || dist < 0.01) continue;
+      if (dist > 3.5 || dist < 0.01) continue;
       const ahead = (dx * want.x + dz * want.z) / dist;
       if (ahead < 0.3) continue;
-      const w = (2.6 - dist) / 2.6 * ahead * (o.team !== d.team ? 1.1 : 0.6);
+      const w = (3.5 - dist) / 3.5 * ahead * (o.team !== d.team ? 1.1 : 0.6);
       want = { x: want.x - want.z * w, z: want.z + want.x * w };
     }
     { const l = Math.hypot(want.x, want.z) || 1; want = { x: want.x / l, z: want.z / l }; }
@@ -719,7 +731,7 @@ function physics(dt) {
     d.x += d.vx * dt; d.z += d.vz * dt;
     const sp = Math.hypot(d.vx, d.vz);
     if (d !== pd && sp > 0.15) { const a = Math.atan2(d.vz, d.vx); let da = a - d.angle; while (da > Math.PI) da -= 2 * Math.PI; while (da < -Math.PI) da += 2 * Math.PI; d.angle += da * Math.min(1, dt * 6); }
-    d.phase += sp * dt * 6;
+    d.phase += sp * dt * 3.2;
   }
   for (let it = 0; it < 3; it++) {
     for (let a = 0; a < G.dogs.length; a++) for (let b = a + 1; b < G.dogs.length; b++) {
@@ -739,7 +751,6 @@ function physics(dt) {
 // ---------- player shooter ----------
 function drivePlayerShooter(dt) {
   const me = G.me;
-  tickGun(me, dt);
   // walk on the U deck
   const f = { x: Math.cos(me.yaw), z: Math.sin(me.yaw) }, r = { x: -f.z, z: f.x };
   const mx = (f.x * -input.jy + r.x * input.jx) * 2.4 * dt, mz = (f.z * -input.jy + r.z * input.jx) * 2.4 * dt;
@@ -747,9 +758,8 @@ function drivePlayerShooter(dt) {
   if (onDeck('blue', me.x, me.z + mz)) me.z += mz;
   me.cool -= dt;
   if (input.firing && me.cool <= 0 && G.phase === 'play') {
-    if (me.reload > 0) return;
     if (me.mag <= 0) { if (me.cool < -0.3) { beep(120, 0.05, 'square', 0.03); me.cool = 0.3; } return; }
-    const sp = input.zoom ? 0.006 : 0.012;
+    const sp = input.zoom ? 0.012 : 0.02;
     spawnShot('blue', muzzle(me), me.yaw + gauss() * sp, me.pitch + gauss() * sp);
     me.mag--; me.cool = 1 / PLAYER_RATE;
     beep(900, 0.03, 'square', 0.01, -400);
@@ -783,7 +793,7 @@ function afterScore() {
   G.shots = []; G.splats = [];
   for (const t of Object.values(G.teams)) for (const sh of t.shooters) {
     if (Math.sign(sh.x) !== startSide(sh.team)) { sh.x = -sh.x; sh.yaw = Math.PI - sh.yaw; } // walk over to the other U
-    sh.mag = MAG; sh.reload = 0; sh.target = null;
+    sh.mag = MAG; sh.target = null; sh.sol = null;
   }
   showBanner(G.overtime ? `OMGÅNG ${G.round} · FÖRLÄNGNING` : `OMGÅNG ${G.round} · BYT SIDA`, `Blå startar ${G.dir > 0 ? 'vänster' : 'höger'} och anfaller ${G.dir > 0 ? 'höger' : 'vänster'} sida`, 2.6);
 }
@@ -1148,7 +1158,7 @@ function render(dt, time) {
     v.g.position.set(s.x, s.y, s.z); v.g.rotation.y = -s.yaw - Math.PI / 2; v.gun.rotation.x = s.pitch;
   }
   viewGun.visible = playing && G.role === 'shooter';
-  if (viewGun.visible) { const kick = G.me.cool > 0.05 ? 0.02 : 0; viewGun.position.z = -0.3 + kick; viewGun.rotation.x = G.me.reload > 0 ? -0.6 : 0; }
+  if (viewGun.visible) { const kick = G.me.cool > 0.05 ? 0.02 : 0; viewGun.position.z = -0.3 + kick; viewGun.rotation.x = G.me.mag <= 0 ? -0.5 : 0; }
 
   const cnt = { blue: 0, red: 0 }; let sc = 0;
   for (const s of G.shots) {
@@ -1234,11 +1244,10 @@ function updateHUD(time, dt) {
   } else {
     $('offline').hidden = true;
     const me = G.me;
-    setText('ammo-n', me.reload > 0 ? '—' : `${me.mag}/${MAG}`);
-    setText('ammo-l', me.reload > 0 ? 'LADDAR' : me.mag === 0 ? 'TOMT' : 'MAG');
-    $('ammo-b').style.width = (me.reload > 0 ? (1 - me.reload / RELOAD_T) : me.mag / MAG) * 100 + '%';
-    $('ammo').classList.toggle('empty', me.mag === 0 && me.reload <= 0);
-    $('reload').classList.toggle('need', me.mag < 15 && me.reload <= 0);
+    setText('ammo-n', `${me.mag}/${MAG}`);
+    setText('ammo-l', me.mag === 0 ? 'TOMT TILL NÄSTA OMGÅNG' : 'NEMESIS');
+    $('ammo-b').style.width = me.mag / MAG * 100 + '%';
+    $('ammo').classList.toggle('empty', me.mag < 20);
     $('fire').classList.toggle('on', input.firing);
     $('zoom').classList.toggle('on', input.zoom);
     $('gunbtns').hidden = !isTouch; $('keyhint').hidden = isTouch;
@@ -1317,7 +1326,6 @@ fireBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); fireBtn.set
 fireBtn.addEventListener('pointermove', (e) => { if (fireTouch && e.pointerId === fireTouch.id) { look(e.clientX - fireTouch.x, e.clientY - fireTouch.y, 0.006); fireTouch.x = e.clientX; fireTouch.y = e.clientY; } });
 const fireUp = (e) => { if (fireTouch && e.pointerId === fireTouch.id) { fireTouch = null; input.firing = false; } };
 fireBtn.addEventListener('pointerup', fireUp); fireBtn.addEventListener('pointercancel', fireUp);
-$('reload').addEventListener('pointerdown', (e) => { e.preventDefault(); if (G) startReload(G.me); });
 $('zoom').addEventListener('pointerdown', (e) => { e.preventDefault(); input.zoom = !input.zoom; });
 
 function applyKeys() {
@@ -1335,7 +1343,6 @@ addEventListener('keydown', (e) => {
   if (k === 'tab' && G.role === 'dog') G.sel = (G.sel + 1) % 3;
   if (k === 'm') muted = !muted;
   if (k === 'v') toggleCam();
-  if (k === 'r' && G.role === 'shooter') startReload(G.me);
   if (k === 'z') input.zoom = !input.zoom;
   if (k === ' ' && G.role === 'shooter') input.firing = true;
   if (k === 'p' || k === 'escape') togglePause();

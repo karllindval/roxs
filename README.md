@@ -23,7 +23,7 @@ Välj roll i menyn:
 - **Hund:** du styr en robothund genom dess kamera, eller med en kamera bakom hunden. Dina tre skyttar sköts av datorn. Byt hund med hundkorten.
 - **Skytt:** du står på den blå plattformen i förstapersonsvy och kan gå runt på hela U:et. Dina hundar och de andra två skyttarna sköts av datorn.
 
-Varje skytt, även datorns, har **60 skott per magasin** och laddar om på 2,5 s. Kulorna följer en riktig kastbana med gravitation. En ring på banan visar var nästa kula landar.
+Skyttarna har en **Nerf Rival Nemesis**: cirka 30 m/s, 8 skott per sekund och en räckvidd på 15–20 m. Kulorna bromsas av luftmotstånd. Varje skytt har **ett magasin på 100 kulor per omgång** och kan inte ladda om. En ring på banan visar var nästa kula landar. Banan räknas i meter (42 × 14 m).
 
 ## Kontroller
 
@@ -32,7 +32,6 @@ Varje skytt, även datorns, har **60 skott per magasin** och laddar om på 2,5 s
 | Dra med vänster tumme | W A S D | Gå/kör |
 | Dra med höger tumme | Mus (klicka för att låsa) / piltangenter | Titta och svänga |
 | Håll SKJUT (och dra för att sikta) | Klick / mellanslag | Skjut |
-| LADDA | R | Ladda om |
 | ZOOM | Z / högerklick | Zooma |
 | Hundkorten | 1 2 3 / Tab | Byt hund (hundrollen) |
 | Vy | V | Hundkamera eller kamera bakom |
@@ -43,7 +42,7 @@ Varje skytt, även datorns, har **60 skott per magasin** och laddar om på 2,5 s
 
 - Omgångar på 60 s. Man spelar till 21 eller 11 poäng.
 - 28 träffar slår ut en hund i 4 s. Varje hund har **en reboot per omgång**: slås den ut en andra gång är den ute resten av omgången. Den står kvar som hinder och får poängen för zonen där den stannade. Vådaskott räknas.
-- Hundarna går i 75 % fart. Fartboost ger 100 % i 5 s.
+- Hundarna springer i 75 % av 20 km/h (15 km/h). Fartboost ger 100 %, alltså 20 km/h, i 5 s.
 
 ## Husregler för de öppna frågorna
 
