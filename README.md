@@ -20,10 +20,10 @@ En spelbar webbprototyp av regelutkastet *ROBOT RUSH v0.1*, med banan från whit
 
 Välj roll i menyn:
 
-- **Hund:** du styr en robothund genom dess kamera, eller med en kamera bakom hunden. Dina tre skyttar sköts av datorn. Byt hund med hundkorten.
-- **Skytt:** du står på den blå plattformen i förstapersonsvy och kan gå runt på hela U:et. Dina hundar och de andra två skyttarna sköts av datorn.
+- **Hund:** du styr en robothund genom dess kamera, eller med en kamera bakom hunden. Dina fyra skyttar sköts av datorn. Byt hund med hundkorten.
+- **Skytt:** du står på lagets plattform i förstapersonsvy och kan gå runt på hela U:et. Dina hundar och de andra tre skyttarna sköts av datorn.
 
-Skyttarna har en **Nerf Rival Nemesis**: cirka 30 m/s, 8 skott per sekund och en räckvidd på 15–20 m. Kulorna bromsas av luftmotstånd. Varje skytt har **ett magasin på 100 kulor per omgång** och kan inte ladda om. En ring på banan visar var nästa kula landar. Banan räknas i meter (60 × 14 m).
+Skyttarna har en **Nerf Rival Nemesis**: cirka 30 m/s, 8 skott per sekund och en räckvidd på 15–20 m. Kulorna bromsas av luftmotstånd. Varje lag har **fyra skyttar**, två på varje arm av U:et. De rör sig fritt längs plattformen, och datorns skyttar går mot den hund de siktar på för att komma inom räckhåll. Varje skytt har **ett magasin på 100 kulor per omgång** och kan inte ladda om. En ring på banan visar var nästa kula landar. Banan räknas i meter (60 × 14 m).
 
 ## Kontroller
 
